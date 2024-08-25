@@ -136,7 +136,7 @@ class Game:
                 if success is not None:
                     print(
                         f'{"🟢" if success else "🔴"} {pirate.name}'
-                        f'{"SUCCEEDED" if success else "FAILED"} the'
+                        f' {"SUCCEEDED" if success else "FAILED"} the'
                         f" quest {pirate.current_quest}"
                     )
                     self.gold -= pirate.current_quest.bounty
