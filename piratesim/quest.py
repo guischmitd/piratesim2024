@@ -1,20 +1,20 @@
-from enum import Enum
+from enum import Enum, auto
 
 import numpy as np
 
 
 class QuestType(Enum):
-    TREASURE = "treasure"
-    COMBAT = "combat"
-    DELIVERY = "delivery"
-    RESCUE = "rescue"
-    SMUGGLING = "smuggling"
-    FETCH = "fetch"
-    EXPLORATION = "exploration"
-    ESCORT = "escort"
-    SURVIVAL = "survival"
-    THEFT = "theft"
-    IDLE = "idle"
+    treasure = auto()
+    combat = auto()
+    delivery = auto()
+    rescue = auto()
+    smuggling = auto()
+    fetch = auto()
+    exploration = auto()
+    escort = auto()
+    survival = auto()
+    theft = auto()
+    idle = auto()
 
 
 class Quest:
@@ -25,8 +25,8 @@ class Quest:
         self.qtype = qtype
         self.difficulty = difficulty
         self.reward = reward
-        self._bounty = None
-        self._progress = self.difficulty
+        self._bounty = 0
+        self.progress = self.difficulty
 
     @classmethod
     def from_dict(cls, template_dict):
@@ -40,7 +40,7 @@ class Quest:
 
         return cls(
             name=template_dict["name"],
-            qtype=QuestType(template_dict["type"]),
+            qtype=QuestType[template_dict["type"]],
             difficulty=difficulty,
             reward=reward,
         )
@@ -57,4 +57,6 @@ class Quest:
             self._bounty = int(value)
 
     def __repr__(self) -> str:
-        return f"[{self.qtype}] {self.name}\t-\tD {self.difficulty}\t-\tR {self.reward}"
+        return (
+            f"D {self.difficulty} - R {self.reward}\t[{self.qtype.name}]\t| {self.name}"
+        )

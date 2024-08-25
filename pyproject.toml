@@ -6,7 +6,6 @@ authors = ["Gui Baraúna <guischmitd@gmail.com>"]
 readme = "README.md"
 
 [tool.black]
-line-length = 88
 target-version = ['py312']
 
 [tool.isort]
