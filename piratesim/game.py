@@ -1,6 +1,6 @@
 import numpy as np
 
-from piratesim.common import get_asset
+from piratesim.common import clear_terminal, get_asset
 from piratesim.pirate import Pirate
 from piratesim.quest import Quest, QuestType
 
@@ -11,6 +11,7 @@ class Game:
         self.quest_bank = self._init_quests()
         self.pirate_bank = self._init_pirates()
         self.turn = 0
+        self.turn_log = {}
 
         self.gold = gold
 
@@ -36,6 +37,10 @@ class Game:
 
     def print_state(self):
         print()
+        if (self.turn - 1) in self.turn_log:
+            print(f"-- 🗒️🖋️ TURN {self.turn - 1} LOG --")
+            [print(line) for line in self.turn_log[self.turn - 1]]
+            print()
 
         print("-- 🏠 Pirates at the Tavern --")
         for pirate in self.pirates:
@@ -68,6 +73,7 @@ class Game:
 
     def select_quests(self):
         while True:
+            clear_terminal()
             self.print_state()
 
             if not self.available_quests:
@@ -113,19 +119,20 @@ class Game:
 
         self.available_quests = self.randomize_quests(self.n_quests)
         self.select_quests()
-        print("\n-- 🗒️🖋️ TURN LOG --")
+        self.turn_log[self.turn] = []
+
         for pirate in self.pirates:
             if pirate.current_quest is None:
                 selected_quest = pirate.select_quest(self.pinned_quests)
                 pirate.current_quest = selected_quest
                 if selected_quest.qtype is QuestType.idle:
-                    print(
+                    self.turn_log[self.turn].append(
                         f"💤 {pirate.name} decided to {selected_quest.name} for"
                         f" {selected_quest.difficulty} turns"
                     )
                 else:
                     self.pinned_quests.remove(selected_quest)
-                    print(
+                    self.turn_log[self.turn].append(
                         f"🚢 {pirate.name} embarked on a voyage!"
                         f" {selected_quest.name} [{selected_quest.qtype.name}]"
                     )
@@ -134,7 +141,7 @@ class Game:
 
                 # TODO QuestEffect abstract class
                 if success is not None:
-                    print(
+                    self.turn_log[self.turn].append(
                         f'{"🟢" if success else "🔴"} {pirate.name}'
                         f' {"SUCCEEDED" if success else "FAILED"} the'
                         f" quest {pirate.current_quest}"
@@ -146,7 +153,7 @@ class Game:
 
                     pirate.current_quest = None
                 else:
-                    print(
+                    self.turn_log[self.turn].append(
                         f"🕓 {pirate.name} is working on a quest"
                         f" [{pirate.current_quest.progress} turn(s) remaining]"
                     )

@@ -28,6 +28,9 @@ class Pirate:
         self.combat = combat
         self.trickyness = trickyness
         self.gold = random.randint(5, 15) * 10
+        self.flavor = random.choice(
+            ["buccaneer", "scallywag", "do-no-good", "sailor", "pirate"]
+        )
 
         self.current_quest = None
 
@@ -210,11 +213,7 @@ class Pirate:
             t=self.trickyness,
             name=self.name,
             trait=self.trait.upper(),
-            flavor={
-                random.choice(
-                    ["buccaneer", "scallywag", "do-no-good", "sailor", "pirate"]
-                )
-            },
+            flavor=self.flavor,
         )
 
 
