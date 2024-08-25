@@ -206,7 +206,7 @@ class Pirate:
             return roll < base_chance
 
     def __repr__(self):
-        template = "| N {n} - C {c}- T {t} | {name}, a {trait} {flavor}"
+        template = "| N {n} - C {c} - T {t} | {name}, a {trait} {flavor}\n\t{desc}"
         return template.format(
             n=self.navigation,
             c=self.combat,
@@ -214,6 +214,7 @@ class Pirate:
             name=self.name,
             trait=self.trait.upper(),
             flavor=self.flavor,
+            desc=self.description,
         )
 
 

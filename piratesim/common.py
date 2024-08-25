@@ -17,7 +17,7 @@ def in_notebook():
     try:
         from IPython import get_ipython
 
-        if "IPKernelApp" not in get_ipython().config:  # pragma: no cover
+        if "IPKernelApp" not in get_ipython().config:
             return False
     except ImportError:
         return False
@@ -31,6 +31,5 @@ def clear_terminal():
         from IPython.display import clear_output
 
         clear_output(wait=True)
-
     else:
         os.system("cls" if os.name == "nt" else "clear")
