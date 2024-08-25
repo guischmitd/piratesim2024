@@ -6,13 +6,13 @@ from piratesim.quest import Quest, QuestType
 
 
 class Game:
-    def __init__(self, n_quests=3, n_pirates=5, level=1) -> None:
+    def __init__(self, n_quests=3, n_pirates=5, gold=1000) -> None:
         self.n_quests = n_quests
         self.quest_bank = self._init_quests()
         self.pirate_bank = self._init_pirates()
         self.turn = 0
 
-        self.gold = 1000
+        self.gold = gold
 
         self.available_quests: list[Quest] = self.randomize_quests(n_quests)
         self.pinned_quests: list[Quest] = []
