@@ -13,5 +13,24 @@ def get_asset(path):
         raise NotImplementedError(f"{suffix} assets are not supported.")
 
 
+def in_notebook():
+    try:
+        from IPython import get_ipython
+
+        if "IPKernelApp" not in get_ipython().config:  # pragma: no cover
+            return False
+    except ImportError:
+        return False
+    except AttributeError:
+        return False
+    return True
+
+
 def clear_terminal():
-    os.system("cls" if os.name == "nt" else "clear")
+    if in_notebook():
+        from IPython.display import clear_output
+
+        clear_output(wait=True)
+
+    else:
+        os.system("cls" if os.name == "nt" else "clear")
