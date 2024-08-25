@@ -1,0 +1,22 @@
+name,type,difficulty_min,difficulty_max,reward_min,reward_max
+Plunder the Ghost Ship,treasure,3,5,100,300
+Hunt the Giant Squid,combat,4,5,200,400
+Deliver the Cursed Chest,delivery,2,4,50,150
+Rescue the Stranded Pirate,rescue,1,3,20,80
+Raid the Merchant Convoy,combat,3,4,150,250
+Find the Lost Map Fragment,treasure,1,2,30,70
+Defeat the Kraken,combat,5,5,300,500
+Smuggle Rum to Port Royale,smuggling,2,4,100,200
+Retrieve the Captain's Hat,fetch,1,3,10,50
+Explore the Sunken Temple,exploration,3,5,120,280
+Capture the Rival Captain,combat,3,5,180,320
+Steal the Governor's Gold,theft,4,5,250,400
+Chart the Uncharted Waters,exploration,2,4,80,180
+Escort the Merchant Ship,escort,2,3,60,140
+Survive the Maelstrom,survival,4,5,200,350
+Recover the Ancient Relic,treasure,3,4,150,270
+Rescue the Mermaid's Necklace,rescue,2,4,90,160
+Sink the Pirate Hunter's Ship,combat,4,5,220,350
+Deliver the Secret Message,delivery,1,2,40,100
+Escape from the Haunted Island,survival,3,4,130,250
+Stay in and have a drink,idle,0,0,-150,-50

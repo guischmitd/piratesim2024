@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "piratesim"
+version = "0.1.0"
+description = "A barebones implementation of a pirate quest management system for our upcoming blockbuster game"
+authors = ["Gui Baraúna <guischmitd@gmail.com>"]
+readme = "README.md"
+
+[tool.black]
+line-length = 88
+target-version = ['py312']
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.poetry.dependencies]
+python = "^3.12"
+streamlit = "^1.37.1"
+pandas = "^2.2.2"
+numpy = "^2.1.0"
+black = "^24.8.0"
+flake8 = "^7.1.1"
+isort = "^5.13.2"
+pre-commit = "^3.8.0"
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
