@@ -32,6 +32,15 @@ class Pirate:
             ["buccaneer", "scallywag", "do-no-good", "sailor", "pirate"]
         )
 
+        potential_openers = [
+            "arrived at the tavern like they knew everyone.",
+            "was found sleeping among the crabs.",
+            "used to sail with a famous captain before a bit of drama.",
+            "figured this island would be a good place to find work.",
+            "had a terrible accident with a fish and a potato once.",
+        ]
+        self.captains_log = [f"{self.name} {random.choice(potential_openers)}"]
+
         self.current_quest = None
 
         self.idle_quest_bank = self.generate_idle_quests()
@@ -53,65 +62,123 @@ class Pirate:
             trickyness=pirate_dict["trickyness"],
         )
 
+    @property
+    def bounty_ratio_threshold(self):
+        thresh = 20  # Pirates expect at least a 20% cut
+        return thresh + 10 if self.trait == Trait.GREEDY else thresh
+
+    def select_idle_quest(self):
+        self.idle_quest_bank = self.generate_idle_quests()
+        return random.choice(self.idle_quest_bank)
+
     def select_quest(self, quests):
         """Selects a quest based on the pirate's traits."""
         if not quests:
-            self.idle_quest_bank = self.generate_idle_quests()
-            return random.choice(self.idle_quest_bank)
+            return self.select_idle_quest()
 
+        quest_roulette = []
         preferred_quests = []
-        # TODO TraitEffect abstract class
 
+        # Pirates require a minimum cut of the bounty
+        for quest in quests:
+            if quest.bounty_ratio > self.bounty_ratio_threshold:
+                quest_roulette.append(quest)
+            else:
+                self.captains_log.append(
+                    f'{self.name} thinks "{quest.name}" is not worth it for this'
+                    " bounty."
+                )
+
+        # TODO TraitEffect abstract class
         if self.trait == Trait.BOLD:
             # Prefer higher difficulty quests
-            preferred_quests = [q for q in quests if q.difficulty_min >= 3]
+            preferred_quests = [q for q in set(quest_roulette) if q.difficulty_min >= 3]
+            quest_roulette.extend(preferred_quests)
         elif self.trait == Trait.CAUTIOUS:
             # Prefer lower difficulty quests
-            preferred_quests = [q for q in quests if q.difficulty_max <= 3]
+            preferred_quests = [q for q in set(quest_roulette) if q.difficulty_max <= 3]
+            quest_roulette.extend(preferred_quests)
         elif self.trait == Trait.GREEDY:
             # Prefer higher reward quests
-            preferred_quests = [q for q in quests if q.reward_max >= 200]
+            preferred_quests = [q for q in set(quest_roulette) if q.bounty >= 100]
+            quest_roulette.extend(preferred_quests)
         elif self.trait == Trait.LOYAL:
             # Prefer rescue or escort missions
             preferred_quests = [
-                q for q in quests if q.qtype in {QuestType.rescue, QuestType.escort}
+                q
+                for q in set(quest_roulette)
+                if q.qtype in {QuestType.rescue, QuestType.escort}
             ]
+            quest_roulette.extend(preferred_quests)
         elif self.trait == Trait.IMPULSIVE:
             # Randomly select a quest
-            return random.choice(quests)
+            selected_quest = random.choice(quests + [self.select_idle_quest()])
+            self.captains_log.append(
+                f"{self.name} thinks life's too short to spend it thinking! Let's go"
+                f" '{selected_quest.name}'"
+            )
+            return selected_quest
         elif self.trait == Trait.STRATEGIC:
             # Prefer quests with clear objectives
             preferred_quests = [
                 q
-                for q in quests
+                for q in set(quest_roulette)
                 if q.qtype in {QuestType.delivery, QuestType.exploration}
             ]
+            quest_roulette.extend(preferred_quests * 2)  # 3 times as likely
         elif self.trait == Trait.SUPERSTITIOUS:
             # Avoid supernatural quests
-            preferred_quests = [q for q in quests if "cursed" not in q.name.lower()]
+            preferred_quests = [
+                q for q in set(quest_roulette) if "cursed" not in q.name.lower()
+            ]
+            quest_roulette.extend(preferred_quests)
         elif self.trait == Trait.BRUTAL:
             # Prefer combat-heavy quests
-            preferred_quests = [q for q in quests if q.qtype == QuestType.combat]
+            preferred_quests = [
+                q for q in set(quest_roulette) if q.qtype == QuestType.combat
+            ]
+            quest_roulette.extend(preferred_quests * 2)  # 3 times as likely
         elif self.trait == Trait.RESOURCEFUL:
             # Prefer exploration or recovery quests
             preferred_quests = [
-                q for q in quests if q.qtype in {QuestType.exploration, QuestType.fetch}
+                q
+                for q in set(quest_roulette)
+                if q.qtype in {QuestType.exploration, QuestType.fetch}
             ]
+            quest_roulette.extend(preferred_quests * 2)  # 3 times as likely
         elif self.trait == Trait.COWARDLY:
             # Prefer low-risk quests
-            preferred_quests = [q for q in quests if q.difficulty_max <= 2]
+            preferred_quests = [q for q in set(quest_roulette) if q.difficulty_max <= 2]
+            quest_roulette.extend(preferred_quests * 2)
         elif self.trait == Trait.TRICKY:
             # Prefer quests with a lot of potential tricks and twists
             preferred_quests = [
-                q for q in quests if q.qtype in {QuestType.smuggling, QuestType.theft}
+                q
+                for q in set(quest_roulette)
+                if q.qtype in {QuestType.smuggling, QuestType.theft}
             ]
+            quest_roulette.extend(preferred_quests * 2)  # 3 times as likely
 
         # If no preferred quests are found, select randomly
         selected_quest = (
-            random.choice(preferred_quests)
-            if preferred_quests
-            else random.choice(quests)
+            random.choice(quest_roulette)
+            if quest_roulette
+            else self.select_idle_quest()
         )
+
+        if selected_quest.qtype == QuestType.idle:
+            self.captains_log.append(
+                f"{self.name} feels there's nothing worth pursuing in the board."
+            )
+        elif selected_quest in preferred_quests:
+            self.captains_log.append(
+                f'{self.name} will love to go "{selected_quest.name}"!'
+            )
+        elif selected_quest not in preferred_quests:
+            self.captains_log.append(
+                f"{self.name} would like to try something different and go"
+                f' "{selected_quest.name}"'
+            )
 
         return selected_quest
 
@@ -130,8 +197,11 @@ class Pirate:
          - A boolean indicating quest success if concluded.
         """
         if self.current_quest.progress > 1:
-            self.current_quest.progress -= 1
-            return None
+            if self.navigation > 3:
+                self.current_quest.progress = max(1, self.current_quest.progress - 2)
+            else:
+                self.current_quest.progress -= 1
+            return None  # Continue
 
         else:
             # Time to roll for success!

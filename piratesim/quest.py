@@ -49,6 +49,10 @@ class Quest:
     def bounty(self):
         return self._bounty
 
+    @property
+    def bounty_ratio(self) -> int:
+        return int(100 * self.bounty / self.reward)
+
     @bounty.setter
     def bounty(self, value):
         if value is not None:
