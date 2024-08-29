@@ -1,21 +1,21 @@
 import random
-from enum import Enum, auto
 
 from piratesim.common.os import get_asset
 from piratesim.common.random import RouletteSelector
 from piratesim.quest import Quest, QuestType
-from piratesim.trait import TraitFactory, BaseTrait
+from piratesim.trait import BaseTrait, TraitFactory
+
 
 class Pirate:
     def __init__(self, name, description, trait, navigation, combat, trickyness):
-        self.name : str = name
-        self.description : str = description
-        self.trait : BaseTrait = trait
-        self.navigation : int = navigation
-        self.combat : int = combat
-        self.trickyness : int = trickyness
-        self.gold : int = random.randint(5, 15) * 10
-        self.flavor : str = random.choice(
+        self.name: str = name
+        self.description: str = description
+        self.trait: BaseTrait = trait
+        self.navigation: int = navigation
+        self.combat: int = combat
+        self.trickyness: int = trickyness
+        self.gold: int = random.randint(5, 15) * 10
+        self.flavor: str = random.choice(
             [
                 "buccaneer",
                 "scallywag",
@@ -86,24 +86,22 @@ class Pirate:
 
         # There's always a chance the pirate will just idle
         roulette.add_item(self.get_random_idle_quest(), 0.5)
-        
+
         modifier_dict = self.trait.apply_to_quest_selection(roulette.get_items())
         for quest, modifier in modifier_dict.items():
             roulette.apply_modifier(quest, *modifier)
-        
+
         selected_quest = roulette.roll()
 
         if selected_quest.qtype == QuestType.idle:
-            self.captains_log.append(
-                f"There's nothing worth doing on the board"
-            )
+            self.captains_log.append("There's nothing worth doing on the board")
         elif selected_quest is roulette.get_most_likely():
             self.captains_log.append(
                 f'My crew will love to go "{selected_quest.name}"!'
             )
         else:
             self.captains_log.append(
-                f"I'd normally prefer other stuff, but let's try to go"
+                "I'd normally prefer other stuff, but let's try to go"
                 f' "{selected_quest.name}"'
             )
 
@@ -126,15 +124,17 @@ class Pirate:
         if self.current_quest.progress > 1:
             base_progress = 1 if self.navigation <= 3 else 2
             trait_effect = self.trait.apply_to_quest_progress(self.current_quest)
-            self.current_quest.progress -= max(1, self.current_quest.progress - (trait_effect + base_progress))
-            
+            self.current_quest.progress -= max(
+                1, self.current_quest.progress - (trait_effect + base_progress)
+            )
+
             return None  # Continue
 
         else:
             # Time to roll for success!
             if self.current_quest.qtype is QuestType.idle:
                 return True
-            
+
             roulette = RouletteSelector([True, False])
             modifier = self.trait.apply_to_quest_resolution(self.current_quest)
             roulette.apply_modifier(True, *modifier)
@@ -153,11 +153,13 @@ class Pirate:
                 QuestType.theft: self.trickyness,
             }.get(self.current_quest.qtype, 0)
 
-            # Each stat point gives a compouding .05 bonus to odds
-            roulette.apply_modifier(True, relevant_stat * .05, False)
+            # Each stat point gives a compouding 0.1 bonus to odds
+            diff = max(0, relevant_stat - self.current_quest.difficulty)
+            roulette.apply_modifier(True, diff * 0.1, False)
             p = roulette.get_probabilities()[True]
             self.captains_log.append(
-                f'Rolled quest success with probability {round(p * 100, 1)}% (odds = {p / (1 - p)}).'
+                f"Rolled quest success with probability {round(p * 100, 1)}% (odds ="
+                f" {p / (1 - p)})."
             )
 
             return roulette.roll()
