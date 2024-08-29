@@ -1,6 +1,6 @@
 import numpy as np
 
-from piratesim.common import clear_terminal, get_asset
+from piratesim.common.os import clear_terminal, get_asset
 from piratesim.pirate import Pirate
 from piratesim.quest import Quest, QuestType
 

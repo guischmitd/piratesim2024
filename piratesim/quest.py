@@ -46,7 +46,19 @@ class Quest:
         )
 
     @property
-    def bounty(self):
+    def is_cursed(self) -> bool:
+        cursed_words = [
+            "magic",
+            "curse",
+            "kraken",
+            "monster",
+            "ghost",
+            "haunted",
+        ]
+        return any([w in self.name.lower() for w in cursed_words])
+
+    @property
+    def bounty(self) -> int:
         return self._bounty
 
     @property

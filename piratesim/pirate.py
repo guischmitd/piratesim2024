@@ -1,8 +1,10 @@
 import random
 from enum import Enum, auto
 
-from piratesim.common import get_asset
+from piratesim.common.os import get_asset
+from piratesim.common.random import RouletteSelector
 from piratesim.quest import Quest, QuestType
+from piratesim.trait import TraitFactory
 
 
 class Trait(Enum):
@@ -29,7 +31,14 @@ class Pirate:
         self.trickyness = trickyness
         self.gold = random.randint(5, 15) * 10
         self.flavor = random.choice(
-            ["buccaneer", "scallywag", "do-no-good", "sailor", "pirate"]
+            [
+                "buccaneer",
+                "scallywag",
+                "do-no-good",
+                "sailor",
+                "pirate",
+                "knife-juggler",
+            ]
         )
 
         potential_openers = [
@@ -56,7 +65,7 @@ class Pirate:
         return cls(
             name=pirate_dict["name"],
             description=pirate_dict["description"],
-            trait=pirate_dict["trait"],
+            trait=TraitFactory.get_trait(pirate_dict["trait"]),
             navigation=pirate_dict["navigation"],
             combat=pirate_dict["combat"],
             trickyness=pirate_dict["trickyness"],
@@ -76,7 +85,8 @@ class Pirate:
         if not quests:
             return self.select_idle_quest()
 
-        quest_roulette = []
+        quest_roulette = RouletteSelector()
+
         preferred_quests = []
 
         # Pirates require a minimum cut of the bounty
