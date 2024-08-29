@@ -72,6 +72,13 @@ class Pirate:
 
         roulette = RouletteSelector(quests)
 
+        # There's always a chance the pirate will just idle
+        roulette.add_item(self.get_random_idle_quest(), 0.5)
+
+        modifier_dict = self.trait.apply_to_quest_selection(roulette.get_items())
+        for quest, modifier in modifier_dict.items():
+            roulette.apply_modifier(quest, *modifier)
+
         # Bounty influence on quest selection (TODO Extract to trait class)
         for quest in quests:
             if quest.bounty_ratio > self.bounty_ratio_threshold:
@@ -83,13 +90,6 @@ class Pirate:
                     " bounty."
                 )
                 roulette.update_chance(quest, 0.0)
-
-        # There's always a chance the pirate will just idle
-        roulette.add_item(self.get_random_idle_quest(), 0.5)
-
-        modifier_dict = self.trait.apply_to_quest_selection(roulette.get_items())
-        for quest, modifier in modifier_dict.items():
-            roulette.apply_modifier(quest, *modifier)
 
         selected_quest = roulette.roll()
 
