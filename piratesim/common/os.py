@@ -5,7 +5,7 @@ import pandas as pd
 
 
 def get_asset(path):
-    asset_path: Path = Path(__file__).parent / "assets" / path
+    asset_path: Path = Path(__file__).parents[1] / "assets" / path
     suffix = asset_path.suffix.lower()
     if suffix.lower() == ".csv":
         return pd.read_csv(asset_path)
