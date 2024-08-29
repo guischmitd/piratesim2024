@@ -1,6 +1,5 @@
-from enum import Enum, auto
-
 import random
+from enum import Enum, auto
 
 
 class QuestType(Enum):

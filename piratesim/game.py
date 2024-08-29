@@ -21,9 +21,7 @@ class Game:
         self.available_quests: list[Quest] = self.randomize_quests(n_quests)
         self.pinned_quests: list[Quest] = []
         self.pinned_quests_expiration: dict[Quest, int] = {}
-        self.pirates: list[Pirate] = random.sample(
-            self.pirate_bank, n_pirates
-        )
+        self.pirates: list[Pirate] = random.sample(self.pirate_bank, n_pirates)
 
     @staticmethod
     def _init_quests():
@@ -79,7 +77,9 @@ class Game:
         for i, quest in enumerate(["Next turn"] + self.available_quests):
             print(f"{i}) {quest}")
         print()
-        print(f"-- 🔄 TURN {self.turn} | 💰 GOLD {self.gold} | 🌱 SEED {self._seed:06d} --")
+        print(
+            f"-- 🔄 TURN {self.turn} | 💰 GOLD {self.gold} | 🌱 SEED {self._seed:06d} --"
+        )
 
     def randomize_quests(self, n_quests):
         return random.sample(self.quest_bank, k=n_quests)
@@ -160,18 +160,18 @@ class Game:
                         f" {selected_quest.name} [{selected_quest.qtype.name}]"
                     )
             else:
-                success = pirate.progress_quest()
+                quest_result = pirate.progress_quest()
 
                 # TODO QuestEffect abstract class
-                if success is not None:
+                if quest_result is not None:
                     self.turn_log[self.turn].append(
-                        f'{"🟢" if success else "🔴"} {pirate.name}'
-                        f' {"SUCCEEDED" if success else "FAILED"} the'
+                        f'{"🟢" if quest_result else "🔴"} {pirate.name}'
+                        f' {"SUCCEEDED" if quest_result else "FAILED"} the'
                         f" quest {pirate.current_quest}"
                     )
                     self.gold -= pirate.current_quest.bounty
                     pirate.gold += pirate.current_quest.bounty
-                    if success:
+                    if quest_result:
                         self.gold += pirate.current_quest.reward
 
                     pirate.current_quest = None
