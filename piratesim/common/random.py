@@ -2,6 +2,8 @@ import random
 from collections import OrderedDict
 from typing import Iterable, Any, Optional
 
+def get_seed():
+    return random.randint(1, 999999)
 
 class RouletteSelector:
     def __init__(self, items: Optional[Iterable] = None) -> None:
@@ -10,6 +12,12 @@ class RouletteSelector:
         if items:
             for item in items:
                 self.add_item(item)
+
+    def get_most_likely(self):
+        if len(self.roulette) == 0 or self.total_chances == 0:
+            return None
+        else:
+            return max(self.roulette.items(), key=lambda x: x[1])
 
     def add_item(self, item, base_chance: float = 1.0):
         assert item not in self.roulette, (
@@ -53,8 +61,8 @@ class RouletteSelector:
 
         lower_bound = 0.0
         for item, chance in self.roulette.items():
-            print(lower_bound, roll, chance / self.total_chances)
             upper_bound = lower_bound + chance / self.total_chances
+            print(lower_bound, '<=', roll, '<', upper_bound, ':', lower_bound <= roll < upper_bound)
             if lower_bound <= roll < upper_bound:
                 return item
             lower_bound = upper_bound
@@ -85,7 +93,7 @@ class Deck(RouletteSelector):
         
         drawn_items = []
         for _ in range(n_draws):
-            if not len(self.roulette) or self.total_chances == 0 and reshuffle:
+            if len(self.roulette) == 0 or self.total_chances == 0 and reshuffle:
                 # Restart the deck
                 self.roulette = self.initial_deck.copy()
 

@@ -1,6 +1,6 @@
 from enum import Enum, auto
 
-import numpy as np
+import random
 
 
 class QuestType(Enum):
@@ -30,13 +30,13 @@ class Quest:
 
     @classmethod
     def from_dict(cls, template_dict):
-        difficulty = np.random.randint(
-            template_dict["difficulty_min"], template_dict["difficulty_max"] + 1
+        difficulty = random.randint(
+            template_dict["difficulty_min"], template_dict["difficulty_max"]
         )
         min_reward = template_dict["reward_min"] // 10
-        max_reward = template_dict["reward_max"] // 10 + 1
+        max_reward = template_dict["reward_max"] // 10
 
-        reward = np.random.randint(min_reward, max_reward) * 10
+        reward = random.randint(min_reward, max_reward) * 10
 
         return cls(
             name=template_dict["name"],

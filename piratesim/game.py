@@ -1,25 +1,28 @@
-import numpy as np
+import random
 
 from piratesim.common.os import clear_terminal, get_asset
+from piratesim.common.random import get_seed
 from piratesim.pirate import Pirate
 from piratesim.quest import Quest, QuestType
 
 
 class Game:
-    def __init__(self, n_quests=3, n_pirates=5, gold=1000) -> None:
+    def __init__(self, n_quests=3, n_pirates=5, gold=1000, seed=None) -> None:
         self.n_quests = n_quests
         self.quest_bank = self._init_quests()
         self.pirate_bank = self._init_pirates()
         self.turn = 0
         self.turn_log = {}
+        self._seed = seed if seed else get_seed()
+        random.seed(self._seed)
 
         self.gold = gold
 
         self.available_quests: list[Quest] = self.randomize_quests(n_quests)
         self.pinned_quests: list[Quest] = []
         self.pinned_quests_expiration: dict[Quest, int] = {}
-        self.pirates: list[Pirate] = np.random.choice(
-            self.pirate_bank, n_pirates, replace=False
+        self.pirates: list[Pirate] = random.sample(
+            self.pirate_bank, n_pirates
         )
 
     @staticmethod
@@ -76,10 +79,10 @@ class Game:
         for i, quest in enumerate(["Next turn"] + self.available_quests):
             print(f"{i}) {quest}")
         print()
-        print(f"-- 🔄 TURN {self.turn} | 💰 GOLD {self.gold}  --")
+        print(f"-- 🔄 TURN {self.turn} | 💰 GOLD {self.gold} | 🌱 SEED {self._seed:06d} --")
 
     def randomize_quests(self, n_quests):
-        return list(np.random.choice(self.quest_bank, n_quests, replace=False))
+        return random.sample(self.quest_bank, k=n_quests)
 
     def select_quests(self):
         while True:
@@ -128,10 +131,6 @@ class Game:
     def next_turn(self):
         self.turn += 1
 
-        self.available_quests = self.randomize_quests(self.n_quests)
-        self.select_quests()
-        self.turn_log[self.turn] = []
-
         for quest in self.pinned_quests:
             turns_to_expire = self.pinned_quests_expiration[quest]
             if turns_to_expire > 1:
@@ -139,6 +138,10 @@ class Game:
             else:
                 self.pinned_quests_expiration.pop(quest)
                 self.pinned_quests.remove(quest)
+
+        self.available_quests = self.randomize_quests(self.n_quests)
+        self.select_quests()
+        self.turn_log[self.turn] = []
 
         for pirate in self.pirates:
             if pirate.current_quest is None:

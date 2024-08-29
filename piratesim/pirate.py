@@ -76,7 +76,7 @@ class Pirate:
         for quest in quests:
             if quest.bounty_ratio > self.bounty_ratio_threshold:
                 # Bounty threshold increases quests odds
-                roulette.apply_modifier(quest, quest.bounty_ratio / 100, multiplicative=False)
+                roulette.apply_modifier(quest, quest.bounty / 100, multiplicative=False)
             else:
                 self.captains_log.append(
                     f'{self.name} thinks "{quest.name}" is not worth it for this'
@@ -97,7 +97,7 @@ class Pirate:
             self.captains_log.append(
                 f"There's nothing worth doing on the board"
             )
-        elif roulette.roulette[selected_quest] > 1.0:
+        elif selected_quest is roulette.get_most_likely():
             self.captains_log.append(
                 f'My crew will love to go "{selected_quest.name}"!'
             )
