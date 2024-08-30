@@ -30,7 +30,7 @@ class QuestFactory:
         elif QuestType[template_dict['type']] == QuestType.idle and 'drink' in template_dict['name'].lower():
             success_effects.append(IncapacitateQuestTakerEffect(n_turns=random.randint(1, 3), quest_name='Get over the hangover'))
         elif QuestType[template_dict['type']] == QuestType.idle and 'fight' in template_dict['name'].lower():
-            success_effects.append(IncapacitateRandomPiratesEffect(n_pirates=random.randint(1, 2), n_turns=random.randint(1, 3), quest_name='Heal the wounds'))
+            success_effects.append(IncapacitateRandomPiratesEffect(n_pirates=random.randint(1, 2), n_turns=random.randint(1, 3), quest_name='Heal the wounds', condition=lambda p: not p.on_a_quest))
 
         return Quest(
             name=template_dict["name"],
