@@ -1,5 +1,5 @@
 from piratesim.common.random import RouletteSelector
-from piratesim.quest import Quest
+from piratesim.quests import Quest
 
 
 def test_no_items():

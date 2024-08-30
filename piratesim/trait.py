@@ -2,7 +2,7 @@ import random
 from abc import ABC
 from enum import Enum
 
-from piratesim.quest import Quest, QuestType
+from piratesim.quests.quest import Quest, QuestType
 
 
 class BaseTrait(ABC):

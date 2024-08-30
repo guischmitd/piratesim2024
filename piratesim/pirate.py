@@ -2,7 +2,8 @@ import random
 
 from piratesim.common.os import get_asset
 from piratesim.common.random import RouletteSelector
-from piratesim.quest import Quest, QuestType
+from piratesim.quests.quest import QuestType
+from piratesim.quests.quest_factory import QuestFactory
 from piratesim.trait import BaseTrait, TraitFactory
 
 
@@ -42,7 +43,7 @@ class Pirate:
     def generate_idle_quests(self):
         quests = []
         for _, row in get_asset("quests/idle_quests.csv").iterrows():
-            quests.append(Quest.from_dict(row.to_dict()))
+            quests.append(QuestFactory.from_dict(row.to_dict()))
         return quests
 
     @classmethod
@@ -64,16 +65,22 @@ class Pirate:
     def get_random_idle_quest(self):
         self.idle_quest_bank = self.generate_idle_quests()
         return random.choice(self.idle_quest_bank)
+    
+    def assign_quest(self, quest):
+        if self.current_quest:
+            self.captains_log.append(f'"{self.current_quest.name}" was interrupted, I will now have to go "{quest.name}"')
+        self.current_quest = quest
 
-    def select_quest(self, quests):
+    def select_quest(self, quests, allow_idle=True):
         """Selects a quest based on the pirate's traits."""
         if not quests:
             return self.get_random_idle_quest()
 
         roulette = RouletteSelector(quests)
 
-        # There's always a chance the pirate will just idle
-        roulette.add_item(self.get_random_idle_quest(), 0.5)
+        if allow_idle:
+            # There's a chance the pirate will just idle
+            roulette.add_item(self.get_random_idle_quest(), 0.5)
 
         modifier_dict = self.trait.apply_to_quest_selection(roulette.get_items())
         for quest, modifier in modifier_dict.items():
@@ -94,7 +101,7 @@ class Pirate:
         selected_quest = roulette.roll()
 
         if selected_quest.qtype == QuestType.idle:
-            self.captains_log.append("There's nothing worth doing on the board")
+            self.captains_log.append(f'Took some time for myself to go "{selected_quest.name}"')
         elif selected_quest is roulette.get_most_likely():
             self.captains_log.append(
                 f'My crew will love to go "{selected_quest.name}"!'
@@ -107,6 +114,7 @@ class Pirate:
 
         return selected_quest
 
+    @property
     def on_a_quest(self):
         if self.current_quest:
             return self.current_quest.qtype is not QuestType.idle
@@ -133,7 +141,7 @@ class Pirate:
         else:
             # Time to roll for success!
             if self.current_quest.qtype is QuestType.idle:
-                return True
+                return self.current_quest.success_effects
 
             roulette = RouletteSelector([True, False])
             modifier = self.trait.apply_to_quest_resolution(self.current_quest)
@@ -141,31 +149,34 @@ class Pirate:
 
             # Modify based on stats (assuming the quest has a primary relevant stat)
             relevant_stat = {
-                QuestType.treasure: self.trickyness,
-                QuestType.combat: self.combat,
-                QuestType.delivery: self.navigation,
                 QuestType.rescue: self.trickyness,
+                QuestType.treasure: self.trickyness,
                 QuestType.smuggling: self.trickyness,
-                QuestType.fetch: self.navigation,
-                QuestType.exploration: self.navigation,
-                QuestType.escort: self.combat,
-                QuestType.survival: max(self.navigation, self.combat),
                 QuestType.theft: self.trickyness,
+                QuestType.exploration: self.navigation,
+                QuestType.delivery: self.navigation,
+                QuestType.fetch: self.navigation,
+                QuestType.survival: max(self.navigation, self.combat),
+                QuestType.combat: self.combat,
+                QuestType.escort: self.combat,
             }.get(self.current_quest.qtype, 0)
 
-            # Each stat point gives a compouding 0.1 bonus to odds
+            # Each stat point above quest difficulty gives a compouding 10% bonus to odds
             diff = max(0, relevant_stat - self.current_quest.difficulty)
-            roulette.apply_modifier(True, diff * 0.1, False)
+            roulette.apply_modifier(True, diff * 0.10, False)
+            
+            # NOTE DEBUG ONLY
             p = roulette.get_probabilities()[True]
+            success = roulette.roll()
             self.captains_log.append(
-                f"Rolled quest success with probability {round(p * 100, 1)}% (odds ="
-                f" {p / (1 - p)})."
+                f'{"Succeeded" if success else "Failed"} the quest "{self.current_quest.name}" with probability {round(p * 100, 1)}% (odds ='
+                f" {round(p / (1 - p), 3)}:1)"
             )
 
-            return roulette.roll()
+            return self.current_quest.success_effects if success else self.current_quest.failure_effects
 
     def __repr__(self):
-        template = "| N {n} - C {c} - T {t} | {name}, a {trait} {flavor}\n|\t{desc}"
+        template = "| N {n} - C {c} - T {t} | {name}, a {trait} {flavor}"
         return template.format(
             n=self.navigation,
             c=self.combat,
@@ -173,5 +184,4 @@ class Pirate:
             name=self.name,
             trait=self.trait,
             flavor=self.flavor,
-            desc=self.description,
         )

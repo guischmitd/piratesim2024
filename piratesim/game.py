@@ -3,16 +3,17 @@ import random
 from piratesim.common.os import clear_terminal, get_asset
 from piratesim.common.random import get_seed
 from piratesim.pirate import Pirate
-from piratesim.quest import Quest, QuestType
-
+from piratesim.quests.quest import Quest, QuestType
+from piratesim.quests.quest_factory import QuestFactory
 
 class Game:
-    def __init__(self, n_quests=3, n_pirates=5, gold=1000, seed=None) -> None:
+    def __init__(self, n_quests=3, n_pirates=5, gold=1000, seed=None, debug=True) -> None:
         self.n_quests = n_quests
-        self.quest_bank = self._init_quests()
+        self.quest_bank = self._load_quest_bank()
         self.pirate_bank = self._init_pirates()
         self.turn = 0
         self.turn_log = {}
+        self._debug = debug
         self._seed = seed if seed else get_seed()
         random.seed(self._seed)
 
@@ -21,16 +22,11 @@ class Game:
         self.available_quests: list[Quest] = self.randomize_quests(n_quests)
         self.pinned_quests: list[Quest] = []
         self.pinned_quests_expiration: dict[Quest, int] = {}
-        self.pirates: list[Pirate] = random.sample(
-            self.pirate_bank, n_pirates
-        )
-
+        self.pirates: list[Pirate] = random.sample(self.pirate_bank, n_pirates)
+    
     @staticmethod
-    def _init_quests():
-        quests = []
-        for _, row in get_asset("quests/quests.csv").iterrows():
-            quests.append(Quest.from_dict(row.to_dict()))
-        return quests
+    def _load_quest_bank():
+        return get_asset("quests/quests.csv")
 
     @staticmethod
     def _init_pirates():
@@ -54,13 +50,13 @@ class Game:
 
         print("-- 🏠 Pirates at the Tavern --")
         for pirate in self.pirates:
-            if not pirate.on_a_quest():
+            if not pirate.on_a_quest:
                 print(pirate)
         print()
 
         print("-- 🧭 Pirates at Sea --")
         for pirate in self.pirates:
-            if pirate.on_a_quest():
+            if pirate.on_a_quest:
                 print(pirate)
         print()
 
@@ -79,10 +75,16 @@ class Game:
         for i, quest in enumerate(["Next turn"] + self.available_quests):
             print(f"{i}) {quest}")
         print()
-        print(f"-- 🔄 TURN {self.turn} | 💰 GOLD {self.gold} | 🌱 SEED {self._seed:06d} --")
+        print(
+            f"-- 🔄 TURN {self.turn} | 💰 GOLD {self.gold} | 🌱 SEED {self._seed:06d} --"
+        )
 
     def randomize_quests(self, n_quests):
-        return random.sample(self.quest_bank, k=n_quests)
+        quests = []
+        for _, row in get_asset("quests/quests.csv").iterrows():
+            quests.append(QuestFactory.from_dict(row.to_dict()))
+    
+        return random.sample(quests, k=n_quests)
 
     def select_quests(self):
         while True:
@@ -146,7 +148,11 @@ class Game:
         for pirate in self.pirates:
             if pirate.current_quest is None:
                 selected_quest = pirate.select_quest(self.pinned_quests)
-                pirate.current_quest = selected_quest
+                pirate.assign_quest(selected_quest)
+                
+                for effect in selected_quest.all_effects:
+                    effect.on_selected(pirate)
+
                 if selected_quest.qtype is QuestType.idle:
                     self.turn_log[self.turn].append(
                         f"💤 {pirate.name} decided to {selected_quest.name} for"
@@ -160,21 +166,27 @@ class Game:
                         f" {selected_quest.name} [{selected_quest.qtype.name}]"
                     )
             else:
-                success = pirate.progress_quest()
+                quest_effects = pirate.progress_quest()
 
-                # TODO QuestEffect abstract class
-                if success is not None:
+                if quest_effects is not None:
                     self.turn_log[self.turn].append(
-                        f'{"🟢" if success else "🔴"} {pirate.name}'
-                        f' {"SUCCEEDED" if success else "FAILED"} the'
-                        f" quest {pirate.current_quest}"
+                        f'✅ {pirate.name} completed the quest {pirate.current_quest.name}'
                     )
+
+                    # TODO bounty effect
                     self.gold -= pirate.current_quest.bounty
                     pirate.gold += pirate.current_quest.bounty
-                    if success:
-                        self.gold += pirate.current_quest.reward
+
+                    if pirate.current_quest.bounty != 0:
+                        self.turn_log[self.turn].append(
+                            f'\tYou paid {pirate.current_quest.bounty} for their troubles'
+                        )
 
                     pirate.current_quest = None
+                    
+                    for effect in quest_effects:
+                        self.turn_log[self.turn].extend([f'\t{s}' for s in effect.resolve(self)])
+
                 else:
                     self.turn_log[self.turn].append(
                         f"🕓 {pirate.name} is working on a quest"

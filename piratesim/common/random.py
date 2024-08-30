@@ -1,9 +1,18 @@
 import random
 from collections import OrderedDict
-from typing import Iterable, Any, Optional
+from typing import Iterable, Optional
+import time
 
 def get_seed():
-    return random.randint(1, 999999)
+    large_prime1 = 314105291
+    large_prime2 = 914105341
+
+    current_time = time.time()
+
+    fractional_time = current_time - int(current_time)
+    seed = int((fractional_time * large_prime1) % large_prime2)
+
+    return seed
 
 class RouletteSelector:
     def __init__(self, items: Optional[Iterable] = None) -> None:
