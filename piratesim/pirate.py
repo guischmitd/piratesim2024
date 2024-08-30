@@ -2,7 +2,7 @@ import random
 
 from piratesim.common.os import get_asset
 from piratesim.common.random import RouletteSelector
-from piratesim.quest import Quest, QuestType
+from piratesim.quests import Quest, QuestType
 from piratesim.trait import BaseTrait, TraitFactory
 
 
