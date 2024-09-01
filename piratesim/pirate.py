@@ -43,7 +43,7 @@ class Pirate:
     def generate_idle_quests(self):
         quests = []
         for _, row in get_asset("quests/idle_quests.csv").iterrows():
-            quests.append(QuestFactory.from_dict(row.to_dict()))
+            quests.append(QuestFactory().from_dict(row.to_dict()))
         return quests
 
     @classmethod
@@ -65,10 +65,13 @@ class Pirate:
     def get_random_idle_quest(self):
         self.idle_quest_bank = self.generate_idle_quests()
         return random.choice(self.idle_quest_bank)
-    
+
     def assign_quest(self, quest):
         if self.current_quest:
-            self.captains_log.append(f'"{self.current_quest.name}" was interrupted, I will now have to go "{quest.name}"')
+            self.captains_log.append(
+                f'"{self.current_quest.name}" was interrupted, I will now have to go'
+                f' "{quest.name}"'
+            )
         self.current_quest = quest
 
     def select_quest(self, quests, allow_idle=True):
@@ -96,12 +99,14 @@ class Pirate:
                     f'{self.name} thinks "{quest.name}" is not worth it for this'
                     " bounty."
                 )
-                roulette.update_chance(quest, 0.0)
+                roulette.set_chance(quest, 0.0)
 
         selected_quest = roulette.roll()
 
         if selected_quest.qtype == QuestType.idle:
-            self.captains_log.append(f'Took some time for myself to go "{selected_quest.name}"')
+            self.captains_log.append(
+                f'Took some time for myself to go "{selected_quest.name}"'
+            )
         elif selected_quest is roulette.get_most_likely():
             self.captains_log.append(
                 f'My crew will love to go "{selected_quest.name}"!'
@@ -131,8 +136,8 @@ class Pirate:
         """
         if self.current_quest.progress > 1:
             base_progress = 1 if self.navigation <= 3 else 2
-            trait_effect = self.trait.apply_to_quest_progress(self.current_quest)
-            self.current_quest.progress -= max(
+            trait_effect = self.trait.apply_to_quest_progress(self)
+            self.current_quest.progress = max(
                 1, self.current_quest.progress - (trait_effect + base_progress)
             )
 
@@ -141,7 +146,7 @@ class Pirate:
         else:
             # Time to roll for success!
             if self.current_quest.qtype is QuestType.idle:
-                return self.current_quest.success_effects
+                return True, self.current_quest.success_effects
 
             roulette = RouletteSelector([True, False])
             modifier = self.trait.apply_to_quest_resolution(self.current_quest)
@@ -161,19 +166,26 @@ class Pirate:
                 QuestType.escort: self.combat,
             }.get(self.current_quest.qtype, 0)
 
-            # Each stat point above quest difficulty gives a compouding 10% bonus to odds
+            # Each stat point above quest difficulty gives a
+            # compouding 10% bonus to odds
             diff = max(0, relevant_stat - self.current_quest.difficulty)
             roulette.apply_modifier(True, diff * 0.10, False)
-            
+
             # NOTE DEBUG ONLY
             p = roulette.get_probabilities()[True]
             success = roulette.roll()
             self.captains_log.append(
-                f'{"Succeeded" if success else "Failed"} the quest "{self.current_quest.name}" with probability {round(p * 100, 1)}% (odds ='
-                f" {round(p / (1 - p), 3)}:1)"
+                f'{"Succeeded" if success else "Failed"} the quest'
+                f' "{self.current_quest.name}" with probability {round(p * 100, 1)}%'
+                f" (odds = {round(p / (1 - p), 3)}:1)"
             )
 
-            return self.current_quest.success_effects if success else self.current_quest.failure_effects
+            return (
+                success,
+                self.current_quest.success_effects
+                if success
+                else self.current_quest.failure_effects,
+            )
 
     def __repr__(self):
         template = "| N {n} - C {c} - T {t} | {name}, a {trait} {flavor}"

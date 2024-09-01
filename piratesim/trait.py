@@ -12,7 +12,7 @@ class BaseTrait(ABC):
         """Returns a dictionary with selection modifiers for a given quest list"""
         return {q: (0.0, False) for q in quests}
 
-    def apply_to_quest_progress(self, quest) -> int:
+    def apply_to_quest_progress(self, pirate) -> int:
         """Override to apply a different progress amount depending on the quest"""
         return 0
 

@@ -1,7 +1,8 @@
-import random
 from enum import Enum, auto
+from typing import Optional
 
 from piratesim.quests.quest_effect import QuestEffect
+
 
 class QuestType(Enum):
     treasure = auto()
@@ -19,13 +20,15 @@ class QuestType(Enum):
 
 class Quest:
     def __init__(
-        self, 
-        name: str, 
-        qtype: QuestType, 
-        difficulty: int, 
+        self,
+        name: str,
+        qtype: QuestType,
+        difficulty: int,
         reward: int,
-        success_effects: list[QuestEffect], 
-        failure_effects: list[QuestEffect]
+        success_effects: list[QuestEffect],
+        failure_effects: list[QuestEffect],
+        notoriety: int = 1,
+        expiration: Optional[int] = None,
     ) -> None:
         self.name = name
         self.qtype = qtype
@@ -35,6 +38,8 @@ class Quest:
         self.progress = self.difficulty  # TODO Improve this
         self.success_effects = success_effects
         self.failure_effects = failure_effects
+        self.notoriety = notoriety
+        self.expiration = expiration
 
     @property
     def is_cursed(self) -> bool:
@@ -45,13 +50,14 @@ class Quest:
             "monster",
             "ghost",
             "haunted",
+            "mermaid",
         ]
         return any([w in self.name.lower() for w in cursed_words])
 
     @property
     def bounty(self) -> int:
         return self._bounty
-    
+
     @property
     def all_effects(self) -> list[QuestEffect]:
         return self.success_effects + self.failure_effects
@@ -71,3 +77,11 @@ class Quest:
         return (
             f"D {self.difficulty} - R {self.reward}\t[{self.qtype.name}]\t| {self.name}"
         )
+
+    def on_selected(self, *args):
+        for effect in self.all_effects:
+            effect.on_selected(*args)
+
+    def on_pinned(self):
+        for effect in self.all_effects:
+            effect.on_pinned(self)

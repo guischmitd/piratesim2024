@@ -1,5 +1,5 @@
 from piratesim.common.random import RouletteSelector
-from piratesim.quests import Quest
+from piratesim.quests.quest_factory import QuestFactory
 
 
 def test_no_items():
@@ -8,7 +8,7 @@ def test_no_items():
 
 
 def test_single_item():
-    q = Quest.from_dict(
+    q = QuestFactory().from_dict(
         {
             "name": "Plunder the Ghost Ship",
             "type": "treasure",
@@ -26,7 +26,7 @@ def test_single_item():
 
 
 def test_remove_impossible_items():
-    q0 = Quest.from_dict(
+    q0 = QuestFactory().from_dict(
         {
             "name": "Plunder the Ghost Ship",
             "type": "treasure",
@@ -37,7 +37,7 @@ def test_remove_impossible_items():
         }
     )
 
-    q1 = Quest.from_dict(
+    q1 = QuestFactory().from_dict(
         {
             "name": "Save Cpt Shaliber",
             "type": "rescue",
@@ -48,7 +48,7 @@ def test_remove_impossible_items():
         }
     )
 
-    q2 = Quest.from_dict(
+    q2 = QuestFactory().from_dict(
         {
             "name": "Loot the tavern",
             "type": "theft",

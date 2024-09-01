@@ -1,7 +1,8 @@
 import random
+import time
 from collections import OrderedDict
 from typing import Iterable, Optional
-import time
+
 
 def get_seed():
     large_prime1 = 314105291
@@ -13,6 +14,7 @@ def get_seed():
     seed = int((fractional_time * large_prime1) % large_prime2)
 
     return seed
+
 
 class RouletteSelector:
     def __init__(self, items: Optional[Iterable] = None) -> None:
@@ -35,7 +37,7 @@ class RouletteSelector:
         )
         self.roulette[item] = base_chance
 
-    def update_chance(self, item, chance):
+    def set_chance(self, item, chance):
         assert item in self.roulette, (
             f"Item {item} is not in this roulette. To add a new item chances use the"
             " add_item() method"
@@ -60,9 +62,11 @@ class RouletteSelector:
 
     def get_items(self):
         return list(self.roulette.keys())
-    
+
     def get_probabilities(self):
-        return {item: chance / self.total_chances for item, chance in self.roulette.items()}
+        return {
+            item: chance / self.total_chances for item, chance in self.roulette.items()
+        }
 
     def roll(self):
         self._remove_impossible_items()
@@ -71,7 +75,15 @@ class RouletteSelector:
         lower_bound = 0.0
         for item, chance in self.roulette.items():
             upper_bound = lower_bound + chance / self.total_chances
-            print(lower_bound, '<=', roll, '<', upper_bound, ':', lower_bound <= roll < upper_bound)
+            print(
+                lower_bound,
+                "<=",
+                roll,
+                "<",
+                upper_bound,
+                ":",
+                lower_bound <= roll < upper_bound,
+            )
             if lower_bound <= roll < upper_bound:
                 return item
             lower_bound = upper_bound
@@ -87,19 +99,23 @@ class RouletteSelector:
 
 
 class Deck(RouletteSelector):
-    def __init__(self, items: Iterable | None = None, n_cards: Iterable[int] | None = None) -> None:
+    def __init__(
+        self, items: Iterable | None = None, n_cards: Iterable[int] | None = None
+    ) -> None:
         super().__init__(items)
-    
+
         if n_cards:
-            assert len(items) == len(n_cards), 'If n_cards is provided, it must be the same len as items'
+            assert len(items) == len(
+                n_cards
+            ), "If n_cards is provided, it must be the same len as items"
             for i, n in zip(items, n_cards):
-                self.update_chance(i, n)
+                self.set_chance(i, n)
 
         self.initial_deck = self.roulette.copy()
 
     def draw(self, n_draws: int = 1, reshuffle: bool = False):
-        assert n_draws >= 1, 'n_draws must be >= 1'
-        
+        assert n_draws >= 1, "n_draws must be >= 1"
+
         drawn_items = []
         for _ in range(n_draws):
             if len(self.roulette) == 0 or self.total_chances == 0 and reshuffle:
@@ -109,7 +125,7 @@ class Deck(RouletteSelector):
             drawn_item = self.roll()
             if drawn_item:
                 self.apply_modifier(drawn_item, -1)
-            
+
             drawn_items.append(drawn_item)
-        
+
         return drawn_items
