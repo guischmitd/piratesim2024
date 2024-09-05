@@ -24,9 +24,9 @@ class Quest:
         name: str,
         qtype: QuestType,
         difficulty: int,
-        reward: int,
-        success_effects: list[QuestEffect],
-        failure_effects: list[QuestEffect],
+        success_effects: list[QuestEffect] = [],
+        failure_effects: list[QuestEffect] = [],
+        reward: int = 0,
         notoriety: int = 1,
         expiration: Optional[int] = None,
     ) -> None:
@@ -70,7 +70,7 @@ class Quest:
     def bounty(self, value):
         if value is not None:
             assert isinstance(value, int), "bounty must be an integer!"
-            assert int(value) >= 0 and int(value) <= self.reward
+            assert int(value) >= 0
             self._bounty = int(value)
 
     def __repr__(self) -> str:

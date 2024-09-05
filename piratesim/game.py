@@ -23,7 +23,7 @@ class Game:
         self.gold = gold
 
         self.notoriety = 0
-        self.max_notoriety = 15
+        self.max_notoriety = 30
 
         self.available_quests: list[Quest] = []
         self.available_quests: list[Quest] = self.randomize_quests(n_quests)
@@ -85,13 +85,13 @@ class Game:
         print(
             f"-- 🔄 TURN {self.turn} | 💰 GOLD {self.gold}  | 🌱 SEED {self._seed} --"
             "\n-- ⚠️  NOTORIETY"
-            f" [{'//' * self.notoriety}{'__' * (self.max_notoriety - self.notoriety)}] --"  # noqa: E501
+            f" [{'/' * self.notoriety}{'_' * (self.max_notoriety - self.notoriety)}] --"  # noqa: E501
         )
 
     def randomize_quests(self, n_quests):
         quests = []
         for _, row in self.quest_bank.iterrows():
-            if row["type"] == "exploration" and row["name"] not in [
+            if (row["type"] == "combat") and row["name"] not in [
                 q.name for q in self.available_quests
             ]:
                 quests.append(QuestFactory().from_dict(row.to_dict()))
@@ -119,6 +119,7 @@ class Game:
         self.available_quests.remove(quest)
         self.pinned_quests.append(quest)
         quest.on_pinned()
+        # TODO Quests that don't expire or rethink this logic
         self.pinned_quests_expiration[quest] = (
             quest.expiration if quest.expiration else quest.difficulty
         )
@@ -138,6 +139,7 @@ class Game:
         ans = input("💰   What will be the pirate's cut? ")
         try:
             ans = int(ans)
+            # TODO allow bounty bigger than reward
             quest.bounty = ans
         except ValueError as e:
             print(f"⚠️   Invalid option! ({e})")
@@ -151,6 +153,9 @@ class Game:
     def _check_game_over(self):
         if self.notoriety >= self.max_notoriety:
             return True
+        if self.gold < 0:
+            return True
+        
         return False
 
     def _update_pinned_quests(self):

@@ -27,6 +27,7 @@ pygame-gui = "^0.6.12"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
+matplotlib = "^3.9.2"
 
 [build-system]
 requires = ["poetry-core"]

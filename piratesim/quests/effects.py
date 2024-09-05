@@ -1,5 +1,5 @@
 from piratesim.common.random import Deck
-from piratesim.quests.quest import Quest
+from piratesim.quests.quest import Quest, QuestType
 from piratesim.quests.quest_effect import QuestEffect
 from piratesim.trait import TraitFactory
 
@@ -86,7 +86,7 @@ class IncapacitateRandomPiratesEffect(QuestEffect):
 
         for pirate in self.target_pirates:
             pirate.assign_quest(
-                quest=QuestFactory.from_dict(
+                quest=QuestFactory().from_dict(
                     {
                         "name": self.quest_name,
                         "type": "idle",
@@ -173,3 +173,34 @@ class NotorietyEffect(QuestEffect):
 
     def on_selected(self, pirate):
         self.quest_taker = pirate
+
+class NewPirateEffect(QuestEffect):
+    def __init__(self, pirate) -> None:
+        self.pirate = pirate
+
+    def resolve(self, game) -> str:
+        game.pirates.append(self.pirate)
+
+        quest_log = [f'{self.pirate.name} is ready for sailing!']
+        return quest_log
+
+
+class NewQuestRescueQuestTakerEffect(QuestEffect):
+    def on_selected(self, pirate):
+        self.quest_taker = pirate
+
+    def resolve(self, game) -> str:
+        from piratesim.quests.quest import Quest
+
+        game.pirates.remove(self.quest_taker)
+        rescue_quest = Quest(
+                name=f'Rescue {self.quest_taker.name}',
+                difficulty=1,
+                qtype=QuestType['rescue'],
+                success_effects=[NewPirateEffect(self.quest_taker)]
+        )
+
+        quest_log = [f"❕ {self.quest_taker.name} is stranded! New rescue quest available"]
+        game.available_quests.append(rescue_quest)
+        
+        return quest_log
