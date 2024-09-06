@@ -1,17 +1,19 @@
-from piratesim.common.os import get_asset
+from piratesim.common.assets import get_asset
 quests = get_asset('quests/quests.csv')
 
 class QuestNode:
-    def __init__(self, quest_id, name):
+    def __init__(self, quest_id, name, marked_as_root):
         self.quest_id = quest_id
         self.name = name
+        self.marked_as_root = marked_as_root
         self.children = []
 
     def add_child(self, child_node):
         self.children.append(child_node)
 
     def print_tree(self, level=0):
-        print("  " * level + f"{self.quest_id}: {self.name}")
+        print("  " * level + f"{self.quest_id}: {self.name}" 
+              + (" [ROOT]" if self.marked_as_root else ""))
         for child in self.children:
             child.print_tree(level + 1)
 
@@ -20,7 +22,7 @@ def build_quest_tree(df):
     quest_dict = {}
     for _, row in df.iterrows():
         quest_id = row['quest_id']
-        quest_dict[quest_id] = QuestNode(quest_id, row['name'])
+        quest_dict[quest_id] = QuestNode(quest_id, row['name'], bool(row['is_chain_root']))
 
     # Track child quests to identify root nodes later
     child_quests = set()

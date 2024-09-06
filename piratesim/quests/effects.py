@@ -184,6 +184,20 @@ class NewPirateEffect(QuestEffect):
         quest_log = [f'{self.pirate.name} is ready for sailing!']
         return quest_log
 
+class NewRandomPirateEffect(QuestEffect):
+    def resolve(self, game) -> str:
+        import random
+
+        new_pirate = random.choice([
+            p for p in game.pirate_bank
+            if p not in game.unlocked_pirates
+            ])
+        
+        game.pirates.append(new_pirate)
+
+        quest_log = [f'{new_pirate.name} is ready for sailing!']
+        return quest_log
+
 
 class NewQuestRescueQuestTakerEffect(QuestEffect):
     def on_selected(self, pirate):

@@ -1,24 +1,113 @@
 import random
 
-from piratesim.common.os import clear_terminal, get_asset
+from piratesim.common.assets import get_asset
+from piratesim.common.utils import clear_terminal
 from piratesim.common.random import get_seed
 from piratesim.pirate import Pirate
 from piratesim.quests.quest import Quest, QuestType
 from piratesim.quests.quest_factory import QuestFactory
 
 
+def load_pirate_bank() -> list[Pirate]:
+    pirates = []
+    for _, row in get_asset("pirates/pirates.csv").iterrows():
+        pirates.append(Pirate.from_dict(row.to_dict()))
+    return pirates
+
+
+def load_quest_bank():
+    return get_asset("quests/quests.csv").set_index("quest_id")
+
+
 class Game:
-    def __init__(
-        self, n_quests=2, n_pirates=2, gold=1000, seed=None, debug=True
-    ) -> None:
+    def __init__(self, max_pirates_per_run=2, n_quests=2, starting_gold=500, seed=None, debug=True) -> None:
+        self.runs = []
+        self.max_pirates_per_run=max_pirates_per_run
         self.n_quests = n_quests
-        self.quest_bank = self._load_quest_bank()
-        self.pirate_bank = self._init_pirates()
-        self.turn = 0
-        self.turn_log = {}
+        self.gold = starting_gold
+
+        self.pirate_bank = load_pirate_bank()
+
         self._debug = debug
         self._seed = seed if seed else get_seed()
         random.seed(self._seed)
+
+        # Starting pirates
+        self.pirates = [p for p in self.pirate_bank if p.level == 0]
+
+
+    def launch_run(self,
+                   selected_pirates
+        ):
+        run = SingleRun(
+            selected_pirates,
+            gold = self.gold,
+            n_quests=self.n_quests,
+            unlocked_pirates=self.pirates,
+            seed=self._seed,
+            debug=self._debug
+        )
+        self.runs.append(run)
+        run.run()
+
+        self.gold = run.gold
+        self.pirates = run.pirates
+
+    def main_menu(self):
+        selected_pirates = []
+        while True:
+            clear_terminal()
+            print(
+                f"-- 🔄 RUNS {len(self.runs)} | 💰 GOLD {self.gold}  | 🌱 SEED {self._seed} --")
+            
+            print("-- YOUR PIRATES --")
+            print('0) Start run')
+            for i, pirate in enumerate(self.pirates):
+                print(f'{i+1}) [{"x" if pirate in selected_pirates else " "}]',
+                    pirate)
+                
+            ans = input(f'\n📢  Select up to {self.max_pirates_per_run} pirates: ')
+            try:
+                ans = int(ans)
+            except:
+                continue
+            
+            if ans not in list(range(len(self.pirates) + 1)):
+                continue
+            
+            if ans == 0:
+                if len(selected_pirates) == 0:
+                    print('> You must select at least 1 pirate!')
+                    continue
+                elif len(selected_pirates) > self.max_pirates_per_run:
+                    print(f'> Only {self.max_pirates_per_run} pirates allowed!')
+                    continue
+                else:
+                    self.launch_run(selected_pirates)
+            
+            selected_pirate = self.pirates[ans - 1]
+            if selected_pirate in selected_pirates:
+                selected_pirates.remove(selected_pirate)
+            else:
+                selected_pirates.append(selected_pirate)
+            
+
+    def run(self):
+        while True:
+            self.main_menu()
+
+
+class SingleRun:
+    def __init__(
+        self, selected_pirates, n_quests, gold, unlocked_pirates, seed, debug=False
+    ) -> None:
+        self.n_quests = n_quests
+        self.quest_bank = load_quest_bank()
+        self.pirate_bank = load_pirate_bank()
+        self.turn = 0
+        self.turn_log = {}
+        self._debug = debug
+        self._seed = seed
 
         self.gold = gold
 
@@ -26,21 +115,10 @@ class Game:
         self.max_notoriety = 30
 
         self.available_quests: list[Quest] = []
-        self.available_quests: list[Quest] = self.randomize_quests(n_quests)
         self.pinned_quests: list[Quest] = []
         self.pinned_quests_expiration: dict[Quest, int] = {}
-        self.pirates: list[Pirate] = random.sample(self.pirate_bank, n_pirates)
-
-    @staticmethod
-    def _load_quest_bank():
-        return get_asset("quests/quests.csv").set_index("quest_id")
-
-    @staticmethod
-    def _init_pirates():
-        pirates = []
-        for _, row in get_asset("pirates/pirates.csv").iterrows():
-            pirates.append(Pirate.from_dict(row.to_dict()))
-        return pirates
+        self.pirates: list[Pirate] = selected_pirates
+        self.unlocked_pirates: list[Pirate] = unlocked_pirates
 
     def print_state(self):
         print()
@@ -88,11 +166,20 @@ class Game:
             f" [{'/' * self.notoriety}{'_' * (self.max_notoriety - self.notoriety)}] --"  # noqa: E501
         )
 
+    @property
+    def quests_in_progress(self):
+        quests_in_progress = []
+        for pirate in self.pirates:
+            if pirate.current_quest:
+                quests_in_progress.append(pirate.current_quest)
+        
+        return quests_in_progress
+
     def randomize_quests(self, n_quests):
         quests = []
         for _, row in self.quest_bank.iterrows():
-            if (row["type"] == "combat") and row["name"] not in [
-                q.name for q in self.available_quests
+            if (row["is_chain_root"]) and row["name"] not in [
+                q.name for q in self.available_quests + self.quests_in_progress
             ]:
                 quests.append(QuestFactory().from_dict(row.to_dict()))
 
@@ -232,4 +319,5 @@ class Game:
                     print(f"-- TURN {key} --")
                     for line in self.turn_log[key]:
                         print(line)
-                break
+                
+                return self

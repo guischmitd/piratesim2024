@@ -1,6 +1,6 @@
 import random
 
-from piratesim.common.os import get_asset
+from piratesim.common.assets import get_asset
 from piratesim.quests.effects import (
     BountyEffect,
     IncapacitateQuestTakerEffect,
