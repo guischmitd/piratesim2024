@@ -51,7 +51,9 @@ class Game:
         run.run()
 
         self.gold = run.gold
-        self.pirates = run.pirates
+        for pirate in run.pirates:
+            if pirate not in self.pirates:
+                self.pirates.append(pirate)
 
     def main_menu(self):
         selected_pirates = []
