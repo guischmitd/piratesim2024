@@ -9,6 +9,7 @@ from piratesim.quests.effects import (
     NotorietyEffect,
     RewardEffect,
     NewQuestRescueQuestTakerEffect,
+    NewRandomPirateEffect,
 )
 from piratesim.quests.quest import Quest, QuestType
 
@@ -20,6 +21,7 @@ class QuestFactory:
     def build_quest(self,
         name,
         qtype,
+        expiration,
         difficulty=3,
         reward=0,
         success_effects=[],
@@ -29,6 +31,7 @@ class QuestFactory:
             name=name,
             qtype=qtype,
             difficulty=difficulty,
+            expiration=expiration,
             reward=reward,
             success_effects=success_effects,
             failure_effects=failure_effects,
@@ -64,6 +67,9 @@ class QuestFactory:
                     ]
                 )
             )
+
+        if template_dict['name'] == 'Rescue the Stranded Pirate':
+            success_effects.append(NewRandomPirateEffect())
 
         if QuestType[template_dict["type"]] != QuestType.idle:
             success_effects.append(NotorietyEffect(template_dict["success_notoriety"]))
@@ -117,6 +123,7 @@ class QuestFactory:
             name=template_dict["name"],
             qtype=QuestType[template_dict["type"]],
             difficulty=difficulty,
+            expiration=template_dict['expiration'],
             reward=reward,
             success_effects=success_effects,
             failure_effects=failure_effects,

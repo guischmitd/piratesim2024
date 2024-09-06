@@ -210,6 +210,7 @@ class NewQuestRescueQuestTakerEffect(QuestEffect):
         rescue_quest = Quest(
                 name=f'Rescue {self.quest_taker.name}',
                 difficulty=1,
+                expiration=10,
                 qtype=QuestType['rescue'],
                 success_effects=[NewPirateEffect(self.quest_taker)]
         )
