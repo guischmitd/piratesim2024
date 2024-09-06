@@ -169,23 +169,30 @@ class SingleRun:
         )
 
     @property
-    def quests_in_progress(self):
-        quests_in_progress = []
+    def quests_in_game(self):
+        quests = []
         for pirate in self.pirates:
             if pirate.current_quest:
-                quests_in_progress.append(pirate.current_quest)
-        
-        return quests_in_progress
+                quests.append(pirate.current_quest)
+
+        quests.extend(self.available_quests)
+
+        quests.extend(self.pinned_quests)
+
+        return quests
 
     def randomize_quests(self, n_quests):
         quests = []
         for _, row in self.quest_bank.iterrows():
             if (row["is_chain_root"]) and row["name"] not in [
-                q.name for q in self.available_quests + self.quests_in_progress
+                q.name for q in self.quests_in_game
             ]:
                 quests.append(QuestFactory().from_dict(row.to_dict()))
 
-        return random.sample(quests, k=min(len(quests), n_quests))
+        if len(quests):
+            return random.sample(quests, k=min(len(quests), n_quests))
+        else:
+            return []
 
     def select_quests(self):
         while True:
@@ -322,4 +329,5 @@ class SingleRun:
                     for line in self.turn_log[key]:
                         print(line)
                 
+                input('\n\n> Press enter to continue...')
                 return self

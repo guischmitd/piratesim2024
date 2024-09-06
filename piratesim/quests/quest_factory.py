@@ -123,7 +123,7 @@ class QuestFactory:
             name=template_dict["name"],
             qtype=QuestType[template_dict["type"]],
             difficulty=difficulty,
-            expiration=template_dict['expiration'],
+            expiration=template_dict.get('expiration', 10),
             reward=reward,
             success_effects=success_effects,
             failure_effects=failure_effects,
