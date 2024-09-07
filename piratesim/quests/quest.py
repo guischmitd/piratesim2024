@@ -13,7 +13,6 @@ class QuestType(Enum):
     fetch = auto()
     exploration = auto()
     escort = auto()
-    survival = auto()
     theft = auto()
     idle = auto()
 

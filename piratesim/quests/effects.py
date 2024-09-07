@@ -174,6 +174,7 @@ class NotorietyEffect(QuestEffect):
     def on_selected(self, pirate):
         self.quest_taker = pirate
 
+
 class NewPirateEffect(QuestEffect):
     def __init__(self, pirate) -> None:
         self.pirate = pirate
@@ -181,21 +182,22 @@ class NewPirateEffect(QuestEffect):
     def resolve(self, game) -> str:
         game.pirates.append(self.pirate)
 
-        quest_log = [f'{self.pirate.name} is ready for sailing!']
+        quest_log = [f"{self.pirate.name} is ready for sailing!"]
         return quest_log
+
 
 class NewRandomPirateEffect(QuestEffect):
     def resolve(self, game) -> str:
         import random
 
-        new_pirate = random.choice([
-            p for p in game.pirate_bank
-            if p not in game.unlocked_pirates
-            ])
-        
+        unlocked_pirate_names = [p.name for p in game.unlocked_pirates]
+        new_pirate = random.choice(
+            [p for p in game.pirate_bank if p.name not in unlocked_pirate_names]
+        )
+
         game.pirates.append(new_pirate)
 
-        quest_log = [f'{new_pirate.name} is ready for sailing!']
+        quest_log = [f"{new_pirate.name} is ready for sailing!"]
         return quest_log
 
 
@@ -208,14 +210,16 @@ class NewQuestRescueQuestTakerEffect(QuestEffect):
 
         game.pirates.remove(self.quest_taker)
         rescue_quest = Quest(
-                name=f'Rescue {self.quest_taker.name}',
-                difficulty=1,
-                expiration=10,
-                qtype=QuestType['rescue'],
-                success_effects=[NewPirateEffect(self.quest_taker)]
+            name=f"Rescue {self.quest_taker.name}",
+            difficulty=1,
+            expiration=10,
+            qtype=QuestType["rescue"],
+            success_effects=[NewPirateEffect(self.quest_taker)],
         )
 
-        quest_log = [f"❕ {self.quest_taker.name} is stranded! New rescue quest available"]
+        quest_log = [
+            f"❕ {self.quest_taker.name} is stranded! New rescue quest available"
+        ]
         game.available_quests.append(rescue_quest)
-        
+
         return quest_log

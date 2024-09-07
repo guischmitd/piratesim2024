@@ -1,8 +1,8 @@
 import random
 
 from piratesim.common.assets import get_asset
-from piratesim.common.utils import clear_terminal
 from piratesim.common.random import get_seed
+from piratesim.common.utils import clear_terminal
 from piratesim.pirate import Pirate
 from piratesim.quests.quest import Quest, QuestType
 from piratesim.quests.quest_factory import QuestFactory
@@ -20,9 +20,16 @@ def load_quest_bank():
 
 
 class Game:
-    def __init__(self, max_pirates_per_run=2, n_quests=2, starting_gold=500, seed=None, debug=True) -> None:
+    def __init__(
+        self,
+        max_pirates_per_run=2,
+        n_quests=2,
+        starting_gold=500,
+        seed=None,
+        debug=True,
+    ) -> None:
         self.runs = []
-        self.max_pirates_per_run=max_pirates_per_run
+        self.max_pirates_per_run = max_pirates_per_run
         self.n_quests = n_quests
         self.gold = starting_gold
 
@@ -35,17 +42,14 @@ class Game:
         # Starting pirates
         self.pirates = [p for p in self.pirate_bank if p.level == 0]
 
-
-    def launch_run(self,
-                   selected_pirates
-        ):
+    def launch_run(self, selected_pirates):
         run = SingleRun(
             selected_pirates,
-            gold = self.gold,
+            gold=self.gold,
             n_quests=self.n_quests,
             unlocked_pirates=self.pirates,
             seed=self._seed,
-            debug=self._debug
+            debug=self._debug,
         )
         self.runs.append(run)
         run.run()
@@ -60,39 +64,41 @@ class Game:
         while True:
             clear_terminal()
             print(
-                f"-- 🔄 RUNS {len(self.runs)} | 💰 GOLD {self.gold}  | 🌱 SEED {self._seed} --")
-            
+                f"-- 🔄 RUNS {len(self.runs)} | 💰 GOLD {self.gold}  | 🌱 SEED"
+                f" {self._seed} --"
+            )
+
             print("-- YOUR PIRATES --")
-            print('0) Start run')
+            print("0) Start run")
             for i, pirate in enumerate(self.pirates):
-                print(f'{i+1}) [{"x" if pirate in selected_pirates else " "}]',
-                    pirate)
-                
-            ans = input(f'\n📢  Select up to {self.max_pirates_per_run} pirates: ')
+                print(
+                    f'{i + 1}) [{"x" if pirate in selected_pirates else " "}]', pirate
+                )
+
+            ans = input(f"\n📢  Select up to {self.max_pirates_per_run} pirates: ")
             try:
                 ans = int(ans)
             except:
                 continue
-            
+
             if ans not in list(range(len(self.pirates) + 1)):
                 continue
-            
+
             if ans == 0:
                 if len(selected_pirates) == 0:
-                    print('> You must select at least 1 pirate!')
+                    print("> You must select at least 1 pirate!")
                     continue
                 elif len(selected_pirates) > self.max_pirates_per_run:
-                    print(f'> Only {self.max_pirates_per_run} pirates allowed!')
+                    print(f"> Only {self.max_pirates_per_run} pirates allowed!")
                     continue
                 else:
                     self.launch_run(selected_pirates)
-            
+
             selected_pirate = self.pirates[ans - 1]
             if selected_pirate in selected_pirates:
                 selected_pirates.remove(selected_pirate)
             else:
                 selected_pirates.append(selected_pirate)
-            
 
     def run(self):
         while True:
@@ -235,7 +241,6 @@ class SingleRun:
         ans = input("💰   What will be the pirate's cut? ")
         try:
             ans = int(ans)
-            # TODO allow bounty bigger than reward
             quest.bounty = ans
         except ValueError as e:
             print(f"⚠️   Invalid option! ({e})")
@@ -249,9 +254,13 @@ class SingleRun:
     def _check_game_over(self):
         if self.notoriety >= self.max_notoriety:
             return True
+
         if self.gold < 0:
             return True
-        
+
+        if not self.pirates:
+            return True
+
         return False
 
     def _update_pinned_quests(self):
@@ -328,6 +337,6 @@ class SingleRun:
                     print(f"-- TURN {key} --")
                     for line in self.turn_log[key]:
                         print(line)
-                
-                input('\n\n> Press enter to continue...')
+
+                input("\n\n> Press enter to continue...")
                 return self

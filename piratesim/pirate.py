@@ -56,7 +56,7 @@ class Pirate:
             navigation=pirate_dict["navigation"],
             combat=pirate_dict["combat"],
             trickyness=pirate_dict["trickyness"],
-            level=pirate_dict["level"]
+            level=pirate_dict["level"],
         )
 
     @property
@@ -151,6 +151,8 @@ class Pirate:
                 return True, self.current_quest.success_effects
 
             roulette = RouletteSelector([True, False])
+            roulette.set_chance(True, 2.0)  # Base success chance is 66%
+
             modifier = self.trait.apply_to_quest_resolution(self.current_quest)
             roulette.apply_modifier(True, *modifier)
 
@@ -163,7 +165,6 @@ class Pirate:
                 QuestType.exploration: self.navigation,
                 QuestType.delivery: self.navigation,
                 QuestType.fetch: self.navigation,
-                QuestType.survival: max(self.navigation, self.combat),
                 QuestType.combat: self.combat,
                 QuestType.escort: self.combat,
             }.get(self.current_quest.qtype, 0)
@@ -171,7 +172,7 @@ class Pirate:
             # Each stat point above quest difficulty gives a
             # compouding 10% bonus to odds
             diff = max(0, relevant_stat - self.current_quest.difficulty)
-            roulette.apply_modifier(True, diff * 0.10, False)
+            roulette.apply_modifier(True, 1 + (diff * 0.10), True)
 
             # NOTE DEBUG ONLY
             p = roulette.get_probabilities()[True]

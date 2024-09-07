@@ -28,7 +28,7 @@ class RouletteSelector:
         if len(self.roulette) == 0 or self.total_chances == 0:
             return None
         else:
-            return max(self.roulette.items(), key=lambda x: x[1])
+            return max(self.roulette.items(), key=lambda x: x[1])[0]
 
     def add_item(self, item, base_chance: float = 1.0):
         assert item not in self.roulette, (
@@ -75,6 +75,7 @@ class RouletteSelector:
         lower_bound = 0.0
         for item, chance in self.roulette.items():
             upper_bound = lower_bound + chance / self.total_chances
+            # NOTE Debug only
             print(
                 lower_bound,
                 "<=",
@@ -82,7 +83,8 @@ class RouletteSelector:
                 "<",
                 upper_bound,
                 ":",
-                lower_bound <= roll < upper_bound,
+                item,
+                "✔️" if lower_bound <= roll < upper_bound else "",
             )
             if lower_bound <= roll < upper_bound:
                 return item
