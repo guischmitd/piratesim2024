@@ -253,15 +253,18 @@ class SingleRun:
 
     def _check_game_over(self):
         if self.notoriety >= self.max_notoriety:
-            return True
+            return (
+                True,
+                "Your deeds travelled far and wide... Right in the Navy's ears!",
+            )
 
         if self.gold < 0:
-            return True
+            return True, "Empty coffers!"
 
         if not self.pirates:
-            return True
+            return True, "Your crew is all gone!"
 
-        return False
+        return False, None
 
     def _update_pinned_quests(self):
         for quest in self.pinned_quests:
@@ -330,9 +333,11 @@ class SingleRun:
 
     def run(self):
         while True:
-            game_over = self.next_turn()
+            game_over, reason = self.next_turn()
             if game_over:
                 print("\n\n >-- GAME OVER --<")
+                print(reason)
+
                 for key in self.turn_log:
                     print(f"-- TURN {key} --")
                     for line in self.turn_log[key]:
