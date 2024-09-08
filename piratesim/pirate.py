@@ -27,6 +27,7 @@ class Pirate:
                 "knife-juggler",
             ]
         )
+        self.artifact = None
 
         potential_openers = [
             "arrived at the tavern like they knew everyone.",
@@ -46,6 +47,17 @@ class Pirate:
         for _, row in get_asset("quests/idle_quests.csv").iterrows():
             quests.append(QuestFactory().from_dict(row.to_dict()))
         return quests
+
+    def equip_artifact(self, artifact):
+        self.artifact = artifact
+        artifact.on_equip(self)
+
+    def unequip_artifact(self):
+        if self.artifact is None:
+            return
+
+        self.artifact.unequip(self)
+        self.artifact = None
 
     @classmethod
     def from_dict(cls, pirate_dict):

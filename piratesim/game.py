@@ -1,5 +1,6 @@
 import random
 
+from piratesim.artifact import Artifact
 from piratesim.common.assets import get_asset
 from piratesim.common.random import get_seed
 from piratesim.common.utils import clear_terminal
@@ -42,6 +43,37 @@ class Game:
         # Starting pirates
         self.pirates = [p for p in self.pirate_bank if p.level == 0]
 
+        # Starting artifacts
+        self.artifacts = [
+            Artifact(
+                name="Heavy Cannons",
+                description=(
+                    "Makes a ship harder to maneuver, but firepower isn't free!"
+                ),
+                navigation_modifier=-1,
+                combat_modifier=+2,
+                trickyness_modifier=0,
+            ),
+            Artifact(
+                name="Black Silk Sails",
+                description=(
+                    "Ideal for hiding in the night, but easier to tear in combat"
+                ),
+                navigation_modifier=0,
+                combat_modifier=-1,
+                trickyness_modifier=+2,
+            ),
+            Artifact(
+                name="Golden Compass",
+                description=(
+                    "Guides the ship true, but its shine is hard to miss by enemies."
+                ),
+                navigation_modifier=+2,
+                combat_modifier=0,
+                trickyness_modifier=-1,
+            ),
+        ]
+
     def launch_run(self, selected_pirates):
         run = SingleRun(
             selected_pirates,
@@ -56,6 +88,10 @@ class Game:
 
         self.gold = run.gold
         for pirate in run.pirates:
+            if pirate.artifact:
+                self.artifacts.append(pirate.artifact)
+                pirate.unequip_artifact()
+
             if pirate not in self.pirates:
                 self.pirates.append(pirate)
 
@@ -69,36 +105,86 @@ class Game:
             )
 
             print("-- YOUR PIRATES --")
-            print("0) Start run")
+            print("0) Next")
             for i, pirate in enumerate(self.pirates):
                 print(
                     f'{i + 1}) [{"x" if pirate in selected_pirates else " "}]', pirate
                 )
 
-            ans = input(f"\n📢  Select up to {self.max_pirates_per_run} pirates: ")
-            try:
-                ans = int(ans)
-            except:
-                continue
+            ans = self._handle_pirate_selection()
 
-            if ans not in list(range(len(self.pirates) + 1)):
-                continue
-
-            if ans == 0:
-                if len(selected_pirates) == 0:
-                    print("> You must select at least 1 pirate!")
-                    continue
-                elif len(selected_pirates) > self.max_pirates_per_run:
-                    print(f"> Only {self.max_pirates_per_run} pirates allowed!")
-                    continue
+            if ans != 0:
+                selected_pirate = self.pirates[ans - 1]
+                if selected_pirate in selected_pirates:
+                    selected_pirates.remove(selected_pirate)
                 else:
-                    self.launch_run(selected_pirates)
+                    selected_pirates.append(selected_pirate)
 
-            selected_pirate = self.pirates[ans - 1]
-            if selected_pirate in selected_pirates:
-                selected_pirates.remove(selected_pirate)
-            else:
-                selected_pirates.append(selected_pirate)
+            elif self._validate_pirate_selection(selected_pirates):
+                self._handle_artifact_equipping(selected_pirates)
+                self.launch_run(selected_pirates)
+                selected_pirates = []
+
+    def _handle_artifact_equipping(self, selected_pirates):
+        for pirate in selected_pirates:
+            clear_terminal()
+
+            print("-- SELECTED PIRATES --")
+            [print(pirate) for pirate in selected_pirates]
+
+            print("\n-- YOUR ARTIFACTS --")
+            print("0) None")
+            for i, artifact in enumerate(self.artifacts):
+                print(f'{i + 1}) "{artifact.name}" {artifact.description}')
+
+            ans = self._handle_artifact_selection(pirate)
+
+            if ans != 0:
+                art = self.artifacts[ans - 1]
+                pirate.equip_artifact(art)
+                self.artifacts.remove(art)
+
+    def _handle_artifact_selection(self, pirate):
+        ans = input(f"\n⚙️  Select an artifact for {pirate.name}: ")
+
+        try:
+            ans = int(ans)
+        except:
+            print("> Invalid option!")
+            return self._handle_artifact_selection(pirate)
+
+        if ans not in range(len(self.artifacts) + 1):
+            print("> Invalid option!")
+            return self._handle_artifact_selection(pirate)
+
+        return ans
+
+    def _validate_pirate_selection(self, selected_pirates):
+        if len(selected_pirates) == 0:
+            print("> You must select at least 1 pirate!")
+            input("Press Enter to continue...")
+            return False
+
+        elif len(selected_pirates) > self.max_pirates_per_run:
+            print(f"> Only {self.max_pirates_per_run} pirates allowed!")
+            input("Press Enter to continue...")
+            return False
+
+        return True
+
+    def _handle_pirate_selection(self):
+        ans = input(f"\n📢  Select up to {self.max_pirates_per_run} pirates: ")
+        try:
+            ans = int(ans)
+        except:
+            print("> Invalid pirate selection option!")
+            return self._handle_pirate_selection()
+
+        if ans not in list(range(len(self.pirates) + 1)):
+            print("> Invalid pirate selection option!")
+            return self._handle_pirate_selection()
+
+        return ans
 
     def run(self):
         while True:
@@ -335,13 +421,16 @@ class SingleRun:
         while True:
             game_over, reason = self.next_turn()
             if game_over:
-                print("\n\n >-- GAME OVER --<")
-                print(reason)
+                clear_terminal()
+                print("TURN LOG:\n\n")
 
                 for key in self.turn_log:
                     print(f"-- TURN {key} --")
                     for line in self.turn_log[key]:
                         print(line)
+                        print()
 
+                print("\n\n     >------ GAME OVER ------<\n")
+                print("\t", reason)
                 input("\n\n> Press enter to continue...")
                 return self
