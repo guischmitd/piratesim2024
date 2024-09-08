@@ -28,10 +28,12 @@ class Game:
         n_quests=2,
         starting_gold=500,
         seed=None,
+        random_encounter_chance=1.0,
         debug=True,
     ) -> None:
         self.runs = []
         self.max_pirates_per_run = max_pirates_per_run
+        self.random_encounter_chance = random_encounter_chance
         self.n_quests = n_quests
         self.gold = starting_gold
 
@@ -56,6 +58,7 @@ class Game:
             gold=self.gold,
             n_quests=self.n_quests,
             unlocked_pirates=self.pirates,
+            random_encounter_chance=self.random_encounter_chance,
             seed=self._seed,
             debug=self._debug,
         )
@@ -169,7 +172,14 @@ class Game:
 
 class SingleRun:
     def __init__(
-        self, selected_pirates, n_quests, gold, unlocked_pirates, seed, debug=False
+        self,
+        selected_pirates,
+        n_quests,
+        gold,
+        unlocked_pirates,
+        seed,
+        random_encounter_chance,
+        debug=False,
     ) -> None:
         self.n_quests = n_quests
         self.quest_bank = load_quest_bank()
@@ -191,7 +201,7 @@ class SingleRun:
         self.unlocked_pirates: list[Pirate] = unlocked_pirates
 
         self.encounter_manager = EncounterManager()
-        self.random_encounter_chance = 1.0  # TODO Adjust
+        self.random_encounter_chance = random_encounter_chance
 
     def print_state(self):
         print()
