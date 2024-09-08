@@ -17,6 +17,7 @@ class Pirate:
         self.trickyness: int = trickyness
         self.gold: int = random.randint(5, 15) * 10
         self.level: int = level
+        self.morale: int = 50
         self.flavor: str = random.choice(
             [
                 "buccaneer",
@@ -203,11 +204,12 @@ class Pirate:
             )
 
     def __repr__(self):
-        template = "| N {n} - C {c} - T {t} | {name}, a {trait} {flavor}"
+        template = "| N {n} - C {c} - T {t} - M {m} | {name}, a {trait} {flavor}"
         return template.format(
             n=self.navigation,
             c=self.combat,
             t=self.trickyness,
+            m=self.morale,
             name=self.name,
             trait=self.trait,
             flavor=self.flavor,

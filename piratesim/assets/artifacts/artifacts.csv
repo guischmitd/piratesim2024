@@ -1,0 +1,4 @@
+name;description;navigation_modifier;combat_modifier;trickyness_modifier
+Heavy Cannons;Makes a ship harder to maneuver, but firepower isn't free!;-1;2;0
+Black Silk Sails;Ideal for hiding in the night, but easier to tear in combat;0;-1;2
+Golden Compass;Guides the ship true, but its shine is hard to miss by enemies.;2;0;-1

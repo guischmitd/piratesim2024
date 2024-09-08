@@ -1,27 +1,27 @@
-name,trait,navigation,combat,trickyness,description,level
-🤥  Cpt Shaliber,Tricky,3,3,5,"Could sell sand in the desert, and you'd still thank him.",3
-🧔🏽‍♂️  Redbeard,Bold,2,3,4,Once tried to wrestle a shark... and won. The shark was never the same.,0
-"⚔️  Lily ""The Blade""",Brutal,2,4,1,"Swings first, asks questions never.",0
-👁️  One-Eyed Pete,Cautious,4,2,3,"Keeps an eye out for trouble... well, half an eye.",1
-🤑  Blackjack,Greedy,3,3,4,He'd steal your gold teeth while you're smiling.,2
-🏅  Scarlett the Swift,Loyal,5,3,2,"Would dive into a storm for her crew, but really hates getting wet.",2
-💥  Barnacle Bill,Impulsive,2,3,3,"His motto: 'Act first, think later… or never.'",0
-🔮  Misty Morgan,Superstitious,3,2,4,"Convinced the sea is watching her, so she watches back.",1
-🧮  Ironfist Ivan,Strategic,4,4,2,Treats every fight like a game of chess... if chess pieces exploded.,2
-"🥃  Grog ""The Gutsy""",Bold,2,5,1,"Afraid of nothing, except running out of rum.",1
-🏃‍♂️  Silent Sam,Cowardly,4,1,4,Runs so fast from danger that even the wind gets left behind.,2
-🃏  Lucky Lenny,Resourceful,4,3,3,Could make a sail out of socks and still win a race.,2
-⛈️  Stormy Weather,Superstitious,4,1,2,Swears she can predict the weather—just don't ask how accurate she is.,0
-🪙  Mara the Merciless,Greedy,2,5,3,Her heart is as cold as the treasure she hoards.,2
-🧭  Navigator Ned,Strategic,5,3,2,"Knows the seas like the back of his hand, but occasionally mixes up left and right.",2
-🦁  Crimson Corsair,Loyal,4,4,1,"She'd fight to the death for her crew, but draws the line at washing dishes.",2
-👹  Madcap Max,Impulsive,3,4,2,Has a habit of charging into battle... even if it's just a bar brawl.,1
-🏗️  Tide Turner,Resourceful,5,2,2,Once turned a rowboat into a fortress with just a spoon and some rope.,1
-💣  Blunderbuss Betty,Brutal,1,5,3,Thinks subtlety is overrated and her blunderbuss agrees.,1
-🌬️  Windy Wendy,Cautious,4,2,3,"Always checks the winds before setting sail, just in case they're plotting something.",1
-😈  Viko the Sicko,Brutal,3,5,3,Rumored to enjoy battles a bit too much—probably why he's always grinning.,3
-⚡  Hiperion,Bold,3,4,2,"Claims to be descended from the gods, but can't swim.",1
-📚  Quartermaster Pibo,Strategic,5,3,4,Knows every trick in the book... because he wrote it.,3
-🐔  Doug Dodger,Cowardly,3,2,5,"Master of avoiding danger, and of taking credit when it's over.",2
-🥭  Mango Loco,Impulsive,2,4,4,Takes orders from a talking mango. Don't ask.,2
-🦵  Kneejerk Mona,Superstitious,4,3,3,"Jumps at every shadow, convinced they're all out to get him.",2
+name;trait;navigation;combat;trickyness;description;level
+🤥  Cpt Shaliber;Tricky;3;3;5;Could sell sand in the desert, and you'd still thank him.;3
+🧔🏽‍♂️  Redbeard;Bold;2;3;4;Once tried to wrestle a shark... and won. The shark was never the same.;0
+"⚔️  Lily ""The Blade""";Brutal;2;4;1;Swings first, asks questions never.;0
+👁️  One-Eyed Pete;Cautious;4;2;3;Keeps an eye out for trouble... well, half an eye.;1
+🤑  Blackjack;Greedy;3;3;4;He'd steal your gold teeth while you're smiling.;2
+🏅  Scarlett the Swift;Loyal;5;3;2;Would dive into a storm for her crew, but really hates getting wet.;2
+💥  Barnacle Bill;Impulsive;2;3;3;His motto: 'Act first, think later… or never.';0
+🔮  Misty Morgan;Superstitious;3;2;4;Convinced the sea is watching her, so she watches back.;1
+🧮  Ironfist Ivan;Strategic;4;4;2;Treats every fight like a game of chess... if chess pieces exploded.;2
+"🥃  Grog ""The Gutsy""";Bold;2;5;1;Afraid of nothing, except running out of rum.;1
+🏃‍♂️  Silent Sam;Cowardly;4;1;4;Runs so fast from danger that even the wind gets left behind.;2
+🃏  Lucky Lenny;Resourceful;4;3;3;Could make a sail out of socks and still win a race.;2
+⛈️  Stormy Weather;Superstitious;4;1;2;Swears she can predict the weather—just don't ask how accurate she is.;0
+🪙  Mara the Merciless;Greedy;2;5;3;Her heart is as cold as the treasure she hoards.;2
+🧭  Navigator Ned;Strategic;5;3;2;Knows the seas like the back of his hand, but occasionally mixes up left and right.;2
+🦁  Crimson Corsair;Loyal;4;4;1;She'd fight to the death for her crew, but draws the line at washing dishes.;2
+👹  Madcap Max;Impulsive;3;4;2;Has a habit of charging into battle... even if it's just a bar brawl.;1
+🏗️  Tide Turner;Resourceful;5;2;2;Once turned a rowboat into a fortress with just a spoon and some rope.;1
+💣  Blunderbuss Betty;Brutal;1;5;3;Thinks subtlety is overrated and her blunderbuss agrees.;1
+🌬️  Windy Wendy;Cautious;4;2;3;Always checks the winds before setting sail, just in case they're plotting something.;1
+😈  Viko the Sicko;Brutal;3;5;3;Rumored to enjoy battles a bit too much—probably why he's always grinning.;3
+⚡  Hiperion;Bold;3;4;2;Claims to be descended from the gods, but can't swim.;1
+📚  Quartermaster Pibo;Strategic;5;3;4;Knows every trick in the book... because he wrote it.;3
+🐔  Doug Dodger;Cowardly;3;2;5;Master of avoiding danger, and of taking credit when it's over.;2
+🥭  Mango Loco;Impulsive;2;4;4;Takes orders from a talking mango. Don't ask.;2
+🦵  Kneejerk Mona;Superstitious;4;3;3;Jumps at every shadow, convinced they're all out to get him.;2

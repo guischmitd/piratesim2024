@@ -4,6 +4,7 @@ from piratesim.artifact import Artifact
 from piratesim.common.assets import get_asset
 from piratesim.common.random import get_seed
 from piratesim.common.utils import clear_terminal
+from piratesim.encounters.encounter_manager import EncounterManager
 from piratesim.pirate import Pirate
 from piratesim.quests.quest import Quest, QuestType
 from piratesim.quests.quest_factory import QuestFactory
@@ -45,33 +46,8 @@ class Game:
 
         # Starting artifacts
         self.artifacts = [
-            Artifact(
-                name="Heavy Cannons",
-                description=(
-                    "Makes a ship harder to maneuver, but firepower isn't free!"
-                ),
-                navigation_modifier=-1,
-                combat_modifier=+2,
-                trickyness_modifier=0,
-            ),
-            Artifact(
-                name="Black Silk Sails",
-                description=(
-                    "Ideal for hiding in the night, but easier to tear in combat"
-                ),
-                navigation_modifier=0,
-                combat_modifier=-1,
-                trickyness_modifier=+2,
-            ),
-            Artifact(
-                name="Golden Compass",
-                description=(
-                    "Guides the ship true, but its shine is hard to miss by enemies."
-                ),
-                navigation_modifier=+2,
-                combat_modifier=0,
-                trickyness_modifier=-1,
-            ),
+            Artifact(**row.to_dict())
+            for _, row in get_asset("artifacts/artifacts.csv").iterrows()
         ]
 
     def launch_run(self, selected_pirates):
@@ -213,6 +189,9 @@ class SingleRun:
         self.pinned_quests_expiration: dict[Quest, int] = {}
         self.pirates: list[Pirate] = selected_pirates
         self.unlocked_pirates: list[Pirate] = unlocked_pirates
+
+        self.encounter_manager = EncounterManager()
+        self.random_encounter_chance = 1.0  # TODO Adjust
 
     def print_state(self):
         print()
@@ -410,9 +389,14 @@ class SingleRun:
 
                 else:
                     self.turn_log[self.turn].append(
-                        f"🕓 {pirate.name} is working on a quest"
+                        f"🕓 {pirate.name} is working on {pirate.current_quest.name}"
                         f" [{pirate.current_quest.progress} turn(s) remaining]"
                     )
+
+                    if random.random() < self.random_encounter_chance:
+                        encounter = EncounterManager().create_encounter()
+                        encounter_log = encounter.trigger(pirate)
+                        self.turn_log[self.turn].extend(encounter_log)
 
         game_over = self._check_game_over()
         return game_over
