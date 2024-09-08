@@ -35,9 +35,9 @@ class BoldTrait(BaseTrait):
 
     def apply_to_quest_resolution(self, quest: Quest) -> tuple[float, bool]:
         if quest.difficulty >= 3:
-            return 0.5, False  # Add 10% to success chance
+            return 0.5, False
         else:
-            return -0.5, False  # Subtract 10% from success chance
+            return -0.5, False 
 
 
 class CautiousTrait(BaseTrait):
@@ -128,12 +128,12 @@ class BrutalTrait(BaseTrait):
     def apply_to_quest_selection(
         self, quests: list[Quest]
     ) -> dict[Quest, tuple[float, bool]]:
-        return {q: (1.0, False) for q in quests if q.qtype == QuestType.combat}
+        return {q: (1.5, True) for q in quests if q.qtype == QuestType.combat}
 
     def apply_to_quest_resolution(self, quest: Quest) -> tuple[float, bool]:
         if quest.qtype == QuestType.combat:
             return 0.85, False
-        return -0.5, False
+        return -0.3, False
 
 
 class ResourcefulTrait(BaseTrait):
@@ -162,8 +162,8 @@ class CowardlyTrait(BaseTrait):
 
     def apply_to_quest_resolution(self, quest: Quest) -> tuple[float, bool]:
         if quest.difficulty <= 2:
-            return 1.0, False  # Add 20% to success chance
-        return -0.5, False  # Subtract 15% from success chance
+            return 0.5, False
+        return -0.5, False
 
 
 class TrickyTrait(BaseTrait):

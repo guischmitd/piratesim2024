@@ -3,7 +3,7 @@ import pygame
 from pygame_gui import UI_BUTTON_PRESSED, UIManager
 from pygame_gui.elements import UIButton
 
-from piratesim.game import Game
+from piratesim.game import SingleRun
 
 # pygame setup
 pygame.init()
@@ -12,7 +12,7 @@ clock = pygame.time.Clock()
 running = True
 dt = 0
 
-game = Game()
+game = SingleRun()
 
 manager = UIManager(
     (screen.get_width(), screen.get_height()), "data/themes/quick_theme.json"

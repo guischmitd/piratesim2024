@@ -1,6 +1,6 @@
 import random
 
-from piratesim.common.os import get_asset
+from piratesim.common.assets import get_asset
 from piratesim.common.random import RouletteSelector
 from piratesim.quests.quest import QuestType
 from piratesim.quests.quest_factory import QuestFactory
@@ -8,7 +8,7 @@ from piratesim.trait import BaseTrait, TraitFactory
 
 
 class Pirate:
-    def __init__(self, name, description, trait, navigation, combat, trickyness):
+    def __init__(self, name, description, trait, navigation, combat, trickyness, level):
         self.name: str = name
         self.description: str = description
         self.trait: BaseTrait = trait
@@ -16,6 +16,7 @@ class Pirate:
         self.combat: int = combat
         self.trickyness: int = trickyness
         self.gold: int = random.randint(5, 15) * 10
+        self.level: int = level
         self.flavor: str = random.choice(
             [
                 "buccaneer",
@@ -26,6 +27,7 @@ class Pirate:
                 "knife-juggler",
             ]
         )
+        self.artifact = None
 
         potential_openers = [
             "arrived at the tavern like they knew everyone.",
@@ -46,6 +48,17 @@ class Pirate:
             quests.append(QuestFactory().from_dict(row.to_dict()))
         return quests
 
+    def equip_artifact(self, artifact):
+        self.artifact = artifact
+        artifact.on_equip(self)
+
+    def unequip_artifact(self):
+        if self.artifact is None:
+            return
+
+        self.artifact.unequip(self)
+        self.artifact = None
+
     @classmethod
     def from_dict(cls, pirate_dict):
         return cls(
@@ -55,6 +68,7 @@ class Pirate:
             navigation=pirate_dict["navigation"],
             combat=pirate_dict["combat"],
             trickyness=pirate_dict["trickyness"],
+            level=pirate_dict["level"],
         )
 
     @property
@@ -149,6 +163,8 @@ class Pirate:
                 return True, self.current_quest.success_effects
 
             roulette = RouletteSelector([True, False])
+            roulette.set_chance(True, 2.0)  # Base success chance is 66%
+
             modifier = self.trait.apply_to_quest_resolution(self.current_quest)
             roulette.apply_modifier(True, *modifier)
 
@@ -161,7 +177,6 @@ class Pirate:
                 QuestType.exploration: self.navigation,
                 QuestType.delivery: self.navigation,
                 QuestType.fetch: self.navigation,
-                QuestType.survival: max(self.navigation, self.combat),
                 QuestType.combat: self.combat,
                 QuestType.escort: self.combat,
             }.get(self.current_quest.qtype, 0)
@@ -169,7 +184,7 @@ class Pirate:
             # Each stat point above quest difficulty gives a
             # compouding 10% bonus to odds
             diff = max(0, relevant_stat - self.current_quest.difficulty)
-            roulette.apply_modifier(True, diff * 0.10, False)
+            roulette.apply_modifier(True, 1 + (diff * 0.10), True)
 
             # NOTE DEBUG ONLY
             p = roulette.get_probabilities()[True]

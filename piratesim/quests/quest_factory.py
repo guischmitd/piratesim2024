@@ -1,6 +1,6 @@
 import random
 
-from piratesim.common.os import get_asset
+from piratesim.common.assets import get_asset
 from piratesim.quests.effects import (
     BountyEffect,
     IncapacitateQuestTakerEffect,
@@ -8,6 +8,8 @@ from piratesim.quests.effects import (
     NewQuestEffect,
     NotorietyEffect,
     RewardEffect,
+    NewQuestRescueQuestTakerEffect,
+    NewRandomPirateEffect,
 )
 from piratesim.quests.quest import Quest, QuestType
 
@@ -15,6 +17,25 @@ from piratesim.quests.quest import Quest, QuestType
 class QuestFactory:
     def __init__(self) -> None:
         self.quest_bank = get_asset("quests/quests.csv").set_index("quest_id")
+
+    def build_quest(self,
+        name,
+        qtype,
+        expiration,
+        difficulty=3,
+        reward=0,
+        success_effects=[],
+        failure_effects=[],
+    ):
+        return Quest(
+            name=name,
+            qtype=qtype,
+            difficulty=difficulty,
+            expiration=expiration,
+            reward=reward,
+            success_effects=success_effects,
+            failure_effects=failure_effects,
+        )
 
     def from_dict(self, template_dict):
         difficulty = random.randint(
@@ -34,7 +55,7 @@ class QuestFactory:
         elif reward < 0:
             failure_effects.append(reward_effect)
 
-        if template_dict.get("next_in_chain") >= 0:
+        if template_dict.get("next_in_chain", -1) >= 0:
             success_effects.append(
                 NewQuestEffect(
                     [
@@ -47,6 +68,9 @@ class QuestFactory:
                 )
             )
 
+        if template_dict['name'] == 'Rescue the Stranded Pirate':
+            success_effects.append(NewRandomPirateEffect())
+
         if QuestType[template_dict["type"]] != QuestType.idle:
             success_effects.append(NotorietyEffect(template_dict["success_notoriety"]))
             failure_effects.append(NotorietyEffect(template_dict["failure_notoriety"]))
@@ -56,11 +80,17 @@ class QuestFactory:
             failure_effects.append(bounty_effect)
 
         if QuestType[template_dict["type"]] == QuestType.combat:
-            failure_effects.append(
-                IncapacitateQuestTakerEffect(
-                    n_turns=random.randint(1, 3), quest_name="Fix the holes in the hull"
+            if difficulty >= 4:
+                failure_effects.append(
+                    NewQuestRescueQuestTakerEffect()
                 )
-            )
+            else:
+                failure_effects.append(
+                    IncapacitateQuestTakerEffect(
+                        n_turns=random.randint(1, 3), quest_name="Fix the holes in the hull"
+                    )
+                )
+
         elif QuestType[template_dict["type"]] == QuestType.theft:
             failure_effects.append(
                 IncapacitateQuestTakerEffect(
@@ -89,10 +119,11 @@ class QuestFactory:
                 )
             )
 
-        return Quest(
+        return self.build_quest(
             name=template_dict["name"],
             qtype=QuestType[template_dict["type"]],
             difficulty=difficulty,
+            expiration=template_dict.get('expiration', 10),
             reward=reward,
             success_effects=success_effects,
             failure_effects=failure_effects,
