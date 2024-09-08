@@ -53,7 +53,7 @@ class Encouter:
             encounter_log.append(
                 "\t" + self.failure_texts[ans].format(name=quest_taker.name)
             )
-            for effect in self.success_effects[ans]:
+            for effect in self.failure_effects[ans]:
                 encounter_log.extend(["\t\t" + s for s in effect.resolve(quest_taker)])
 
         return encounter_log
