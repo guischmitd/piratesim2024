@@ -8,9 +8,9 @@ class MoraleEffect(EncounterEffect):
     def resolve(self, pirate):
         effect_log = []
         if self.morale_value > 0:
-            effect_log.append(f"The crew's morale increased by {self.morale_value}!")
+            effect_log.append(f"👍 The crew's morale increased by {self.morale_value}!")
         elif self.morale_value < 0:
-            effect_log.append(f"The crew's morale decreased by {self.morale_value}!")
+            effect_log.append(f"👎 The crew's morale decreased by {self.morale_value}!")
 
         pirate.morale += self.morale_value
 

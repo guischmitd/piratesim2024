@@ -223,3 +223,26 @@ class NewQuestRescueQuestTakerEffect(QuestEffect):
         game.available_quests.append(rescue_quest)
 
         return quest_log
+
+
+class RegionDiscoveredEffect(QuestEffect):
+    def __init__(self, region) -> None:
+        self.region = region
+
+    def resolve(self, game) -> str:
+        quest_log = [f'🗺️  {self.region.island_name} discovered!']
+        self.region.explore()
+        
+        return quest_log
+
+
+class RetryQuestEffect(QuestEffect):
+    def on_pinned(self, quest):
+        self.parent_quest = quest
+    
+    def resolve(self, game) -> str:
+        quest_log = [f'The quest can be retried']
+        self.parent_quest.reset()
+        game.available_quests.append(self.parent_quest)
+
+        return quest_log

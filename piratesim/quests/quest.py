@@ -23,6 +23,7 @@ class Quest:
         name: str,
         qtype: QuestType,
         difficulty: int,
+        distance: int,
         success_effects: list[QuestEffect] = [],
         failure_effects: list[QuestEffect] = [],
         reward: int = 0,
@@ -34,7 +35,8 @@ class Quest:
         self.difficulty = difficulty
         self.reward = reward
         self._bounty = 0
-        self.progress = self.difficulty  # TODO Improve this
+        self._distance = distance
+        self.progress = distance
         self.success_effects = success_effects
         self.failure_effects = failure_effects
         self.notoriety = notoriety
@@ -50,6 +52,7 @@ class Quest:
             "ghost",
             "haunted",
             "mermaid",
+            "strange",
         ]
         return any([w in self.name.lower() for w in cursed_words])
 
@@ -76,6 +79,10 @@ class Quest:
         return (
             f"D {self.difficulty} - R {self.reward}\t[{self.qtype.name}]\t| {self.name}"
         )
+    
+    def reset(self):
+        self.progress = self._distance
+        self.bounty = 0
 
     def on_selected(self, *args):
         for effect in self.all_effects:

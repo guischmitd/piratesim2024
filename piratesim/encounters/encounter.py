@@ -56,6 +56,12 @@ class Encouter:
             for effect in self.failure_effects[ans]:
                 encounter_log.extend(["\t\t" + s for s in effect.resolve(quest_taker)])
 
+        print()
+        for line in encounter_log[1:]:
+            print(line)
+            print()
+        input('> Press Enter to continue <')
+
         return encounter_log
 
     def _handle_option_selection(self):
@@ -64,10 +70,10 @@ class Encouter:
             ans = int(ans)
         except:
             print("> Invalid option!")
-            return self._handle_option_selection
+            return self._handle_option_selection()
 
         if ans not in range(1, len(self.options) + 1):
             print("> Invalid option!")
-            return self._handle_option_selection
+            return self._handle_option_selection()
 
         return ans - 1

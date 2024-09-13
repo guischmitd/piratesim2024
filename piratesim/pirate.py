@@ -73,9 +73,9 @@ class Pirate:
         )
 
     @property
-    def bounty_ratio_threshold(self):
-        thresh = 15
-        return thresh + self.trait.apply_to_minimum_bounty_ratio()
+    def minimum_bounty(self):
+        thresh = 10
+        return thresh + self.trait.apply_to_minimum_bounty()
 
     def get_random_idle_quest(self):
         self.idle_quest_bank = self.generate_idle_quests()
@@ -106,7 +106,7 @@ class Pirate:
 
         # Bounty influence on quest selection (TODO Extract to trait class)
         for quest in quests:
-            if quest.bounty_ratio > self.bounty_ratio_threshold:
+            if quest.bounty >= self.minimum_bounty:
                 # Bounty threshold increases quests odds
                 roulette.apply_modifier(quest, quest.bounty / 100, multiplicative=False)
             else:
@@ -166,6 +166,9 @@ class Pirate:
             roulette = RouletteSelector([True, False])
             roulette.set_chance(True, 2.0)  # Base success chance is 66%
 
+            # Morale modifier
+            roulette.apply_modifier(True, (self.morale - 40) / 100)
+
             modifier = self.trait.apply_to_quest_resolution(self.current_quest)
             roulette.apply_modifier(True, *modifier)
 
@@ -214,3 +217,10 @@ class Pirate:
             trait=self.trait,
             flavor=self.flavor,
         )
+
+
+def load_pirate_bank() -> list[Pirate]:
+    pirates = []
+    for _, row in get_asset("pirates/pirates.csv").iterrows():
+        pirates.append(Pirate.from_dict(row.to_dict()))
+    return pirates

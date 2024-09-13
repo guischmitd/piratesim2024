@@ -1,7 +1,7 @@
-name;type;difficulty_min;difficulty_max;reward_min;reward_max;success_notoriety;failure_notoriety;expiration;next_in_chain
-Have a drink... or two 🍻;idle;1;3;-50;0;0;0;10;-1
-Pick a fight 🥊;idle;1;1;-100;-50;0;0;10;-1
-Play dice 🎲;idle;1;2;-50;0;0;0;10;-1
-Sing a song of their own writing 🎶;idle;1;2;-20;0;0;0;10;-1
-Mingle with the tavern staff 👄;idle;1;2;-100;-50;0;0;10;-1
-Take a nap 💤;idle;1;1;0;0;0;0;10;-1
+name;type;difficulty_min;difficulty_max;reward_min;reward_max;success_notoriety;failure_notoriety;expiration;next_in_chain;retry
+Have a drink... or two 🍻;idle;1;3;-50;0;0;0;10;-1;0
+Pick a fight 🥊;idle;1;1;-100;-50;0;0;10;-1;0
+Play dice 🎲;idle;1;2;-50;0;0;0;10;-1;0
+Sing a song of their own writing 🎶;idle;1;2;-20;0;0;0;10;-1;0
+Mingle with the tavern staff 👄;idle;1;2;-100;-50;0;0;10;-1;0
+Take a nap 💤;idle;1;1;0;0;0;0;10;-1;0

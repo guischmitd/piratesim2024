@@ -10,6 +10,8 @@ from piratesim.quests.effects import (
     RewardEffect,
     NewQuestRescueQuestTakerEffect,
     NewRandomPirateEffect,
+    RetryQuestEffect,
+    RegionDiscoveredEffect,
 )
 from piratesim.quests.quest import Quest, QuestType
 
@@ -22,6 +24,7 @@ class QuestFactory:
         name,
         qtype,
         expiration,
+        distance,
         difficulty=3,
         reward=0,
         success_effects=[],
@@ -29,6 +32,7 @@ class QuestFactory:
     ):
         return Quest(
             name=name,
+            distance=distance,
             qtype=qtype,
             difficulty=difficulty,
             expiration=expiration,
@@ -37,12 +41,13 @@ class QuestFactory:
             failure_effects=failure_effects,
         )
 
-    def from_dict(self, template_dict):
+    def from_dict(self, template_dict, parent_region=None):
         difficulty = random.randint(
             template_dict["difficulty_min"], template_dict["difficulty_max"]
         )
         min_reward = template_dict["reward_min"] // 10
         max_reward = template_dict["reward_max"] // 10
+
 
         reward = random.randint(min_reward, max_reward) * 10
         reward_effect = RewardEffect(reward)
@@ -50,11 +55,26 @@ class QuestFactory:
         success_effects = []
         failure_effects = []
 
+        # Handle region discovery
+        if parent_region:
+            if not parent_region.discovered:
+                success_effects.append(RegionDiscoveredEffect(region=parent_region))
+                if parent_region.available_quest:
+                    success_effects.append(
+                        NewQuestEffect(new_quests=[parent_region.available_quest])
+                    )
+
+        # Handle reward
         if reward > 0 or QuestType[template_dict["type"]] == QuestType.idle:
             success_effects.append(reward_effect)
         elif reward < 0:
             failure_effects.append(reward_effect)
 
+        # Handle retry
+        if template_dict.get('retry', 1):
+            failure_effects.append(RetryQuestEffect())
+
+        # Handle chains
         if template_dict.get("next_in_chain", -1) >= 0:
             success_effects.append(
                 NewQuestEffect(
@@ -68,9 +88,11 @@ class QuestFactory:
                 )
             )
 
+        # Handle unlockable pirates
         if template_dict['name'] == 'Rescue the Stranded Pirate':
             success_effects.append(NewRandomPirateEffect())
 
+        # Handle bounty and notoriety
         if QuestType[template_dict["type"]] != QuestType.idle:
             success_effects.append(NotorietyEffect(template_dict["success_notoriety"]))
             failure_effects.append(NotorietyEffect(template_dict["failure_notoriety"]))
@@ -79,6 +101,7 @@ class QuestFactory:
             success_effects.append(bounty_effect)
             failure_effects.append(bounty_effect)
 
+        # Handle combat failure states
         if QuestType[template_dict["type"]] == QuestType.combat:
             if difficulty >= 4:
                 failure_effects.append(
@@ -91,6 +114,7 @@ class QuestFactory:
                     )
                 )
 
+        # Handle other incapacitated states
         elif QuestType[template_dict["type"]] == QuestType.theft:
             failure_effects.append(
                 IncapacitateQuestTakerEffect(
@@ -123,6 +147,7 @@ class QuestFactory:
             name=template_dict["name"],
             qtype=QuestType[template_dict["type"]],
             difficulty=difficulty,
+            distance=parent_region.distance if parent_region else 3,
             expiration=template_dict.get('expiration', 10),
             reward=reward,
             success_effects=success_effects,

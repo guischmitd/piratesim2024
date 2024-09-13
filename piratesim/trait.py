@@ -20,7 +20,7 @@ class BaseTrait(ABC):
         """Returns success modifiers for a given quest"""
         return (0.0, False)
 
-    def apply_to_minimum_bounty_ratio(self) -> int:
+    def apply_to_minimum_bounty(self) -> int:
         return 0
 
     def __repr__(self) -> str:
@@ -65,7 +65,7 @@ class GreedyTrait(BaseTrait):
         else:
             return -0.5, False
 
-    def apply_to_minimum_bounty_ratio(self) -> int:
+    def apply_to_minimum_bounty(self) -> int:
         return 10  # needs 10% more bounty / reward than other pirates
 
 
