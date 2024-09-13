@@ -6,6 +6,7 @@ class Artifact:
         navigation_modifier,
         combat_modifier,
         trickyness_modifier,
+        **kwargs
     ) -> None:
         self.name = name
         self.description = description
