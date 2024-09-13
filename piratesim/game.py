@@ -35,7 +35,13 @@ class Game:
 
         # Starting artifacts
         self.artifacts = [
-            Artifact(**row.to_dict())
+            Artifact(
+                name=row['name'],
+                description=row['description'],
+                navigation_modifier=row['navigation_modifier'],
+                combat_modifier=row['combat_modifier'],
+                trickyness_modifier=row['trickyness_modifier'],
+                )
             for _, row in get_asset("artifacts/artifacts.csv").iterrows()
         ]
 
